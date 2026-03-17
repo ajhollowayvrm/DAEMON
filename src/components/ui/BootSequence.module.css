@@ -1,8 +1,7 @@
-/* ── Boot sequence overlay ── */
 .bootOverlay {
   position: fixed;
   inset: 0;
-  z-index: 9999;
+  z-index: 99999;
   background: var(--bg-deepest);
   display: flex;
   align-items: center;
@@ -10,25 +9,41 @@
   pointer-events: all;
 }
 
+.bootOverlay::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0, 255, 245, 0.015) 2px,
+      rgba(0, 255, 245, 0.015) 4px
+    );
+  pointer-events: none;
+}
+
 .bootFadeOut {
-  animation: boot-fade-out var(--fade-duration, 500ms) ease-out forwards;
+  animation: boot-fade-out var(--fade-duration, 600ms) ease-out forwards;
   pointer-events: none;
 }
 
 .bootContent {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 24px;
-  max-width: 500px;
+  align-items: flex-start;
+  gap: 12px;
+  max-width: 640px;
   width: 100%;
   padding: 32px;
+  max-height: 80vh;
+  overflow-y: auto;
 }
 
-/* ── Logo title ── */
 .bootLogo {
   font-family: var(--font-display);
-  font-size: 28px;
+  font-size: 32px;
   font-weight: 700;
   letter-spacing: 10px;
   text-transform: uppercase;
@@ -40,52 +55,81 @@
   animation: gradient-shift 3s ease infinite;
   filter: drop-shadow(0 0 12px rgba(0, 255, 245, 0.5))
     drop-shadow(0 0 30px rgba(255, 44, 241, 0.3));
-  margin-bottom: 12px;
+  align-self: center;
 }
 
-/* ── Boot text lines ── */
+.bootSubtitle {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  align-self: center;
+  margin-bottom: 16px;
+}
+
 .bootLines {
   width: 100%;
   font-family: var(--font-mono);
-  font-size: 12px;
-  line-height: 1.8;
-  color: var(--neon-cyan);
-  text-shadow: 0 0 8px rgba(0, 255, 245, 0.4);
-  min-height: 160px;
+  font-size: 11px;
+  line-height: 1.6;
+  color: rgba(0, 255, 245, 0.7);
 }
 
 .bootLine {
-  animation: boot-line-in 0.2s ease-out both;
+  animation: boot-line-in 0.15s ease-out both;
   opacity: 0;
+  white-space: pre;
+}
+
+.bootLineSpacer {
+  height: 8px;
+}
+
+.bootLineOk {
+  color: rgba(0, 255, 245, 0.8);
+}
+
+.bootLineOk::after {
+  color: var(--neon-green);
+}
+
+.bootLineWarn {
+  color: var(--neon-yellow);
+  text-shadow: 0 0 6px rgba(255, 230, 0, 0.3);
 }
 
 .bootLineReady {
   color: var(--neon-green);
-  text-shadow: 0 0 10px rgba(57, 255, 20, 0.5);
+  text-shadow: 0 0 12px rgba(57, 255, 20, 0.5);
   font-weight: 700;
+  font-size: 12px;
 }
 
-/* ── Blinking cursor ── */
 .bootCursor {
   display: inline-block;
   color: var(--neon-cyan);
-  animation: boot-cursor-blink 0.6s step-end infinite;
-  font-weight: 700;
+  animation: boot-cursor-blink 0.5s step-end infinite;
+  font-size: 12px;
 }
 
-/* ── Progress bar ── */
-.bootBar {
-  width: 100%;
-  height: 2px;
-  background: rgba(0, 255, 245, 0.1);
-  border-radius: 1px;
-  overflow: hidden;
+@keyframes boot-line-in {
+  from {
+    opacity: 0;
+    transform: translateX(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
-.bootBarFill {
-  height: 100%;
-  background: linear-gradient(90deg, var(--neon-cyan), var(--neon-magenta));
-  box-shadow: 0 0 8px rgba(0, 255, 245, 0.5);
-  transition: width 0.3s ease-out;
-  border-radius: 1px;
+@keyframes boot-cursor-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+@keyframes boot-fade-out {
+  0% { opacity: 1; }
+  100% { opacity: 0; }
 }

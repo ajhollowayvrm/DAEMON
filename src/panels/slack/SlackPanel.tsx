@@ -123,7 +123,7 @@ export function SlackPanel() {
       badge={totalUnread > 0 ? `${totalUnread} unread` : undefined}
       badgeVariant={totalUnread > 0 ? "green" : "default"}
     >
-      {isLoading && <RetroLoader text="Loading Slack..." />}
+      {isLoading && <RetroLoader type="slack" />}
       {isError && <ErrorState message={String(error)} onRetry={() => refetch()} />}
       {sections?.map((section) => (
         <SectionView

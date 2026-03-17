@@ -161,7 +161,7 @@ export function GitLabPanel() {
         </button>
       </div>
 
-      {isLoading && <RetroLoader text="Loading merge requests..." />}
+      {isLoading && <RetroLoader type="gitlab" />}
       {isError && (
         <ErrorState
           message={String(error)}

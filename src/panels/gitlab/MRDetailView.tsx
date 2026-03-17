@@ -246,7 +246,7 @@ export function MRDetailView({
         )}
       </div>
 
-      {isLoading && <RetroLoader text="Loading MR..." />}
+      {isLoading && <RetroLoader type="gitlab" />}
       {isError && <ErrorState message={String(error)} onRetry={() => refetch()} />}
       {mr && (
         <div className={styles.content}>

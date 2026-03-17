@@ -157,7 +157,7 @@ function IssueDetailView({
         )}
       </div>
 
-      {isLoading && <RetroLoader text="Loading ticket..." />}
+      {isLoading && <RetroLoader type="linear" />}
       {isError && <ErrorState message="Could not load ticket" />}
       {detail && (
         <div className={styles.detailContent}>
@@ -291,7 +291,7 @@ export function LinearPanel() {
         </button>
       </div>
 
-      {isLoading && <RetroLoader text="Loading tickets..." />}
+      {isLoading && <RetroLoader type="linear" />}
       {isError && (
         <ErrorState
           message="Could not reach Linear"
