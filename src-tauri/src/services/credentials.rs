@@ -4,7 +4,7 @@ use std::path::PathBuf;
 
 fn config_path() -> PathBuf {
     let home = std::env::var("HOME").unwrap_or_else(|_| ".".into());
-    let dir = PathBuf::from(home).join(".config").join("neondash");
+    let dir = PathBuf::from(home).join(".config").join("daemon");
     let _ = fs::create_dir_all(&dir);
     dir.join("credentials.json")
 }

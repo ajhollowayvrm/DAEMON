@@ -249,7 +249,7 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
             API Credentials
           </div>
           <div className={styles.sectionDesc}>
-            Tokens are stored locally in ~/.config/neondash/credentials.json
+            Tokens are stored locally in ~/.config/daemon/credentials.json
           </div>
 
           {settings && (

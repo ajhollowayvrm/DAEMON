@@ -97,7 +97,7 @@ The first build compiles ~450 Rust crates and takes 3-5 minutes. Subsequent buil
 ### First Run
 
 1. The app opens with the boot sequence (configurable in Settings)
-2. API keys from `.env` are stored in `~/.config/neondash/credentials.json`
+2. API keys from `.env` are stored in `~/.config/daemon/credentials.json`
 3. Slack credentials are auto-extracted from your Slack desktop app
 4. All 4 panels load data from their respective APIs
 5. Reconfigure keys anytime via **D.A.E.M.O.N.** → **Settings** (or `Cmd+,`)
@@ -169,7 +169,7 @@ These are currently hardcoded — edit the source to match your setup:
 │  Linear ─→ GraphQL API (issues, comments, mutations)         │
 │  Agents ─→ claude CLI subprocess (--print, streaming)        │
 │                                                               │
-│  Credentials: ~/.config/neondash/credentials.json             │
+│  Credentials: ~/.config/daemon/credentials.json             │
 └───────────────────────────────────────────────────────────────┘
 ```
 
@@ -200,7 +200,7 @@ See [THEMES.md](THEMES.md) for the full guide to creating custom themes.
 
 ### Security Model
 
-- **API tokens** stored in a local JSON file (`~/.config/neondash/credentials.json`), never in the webview
+- **API tokens** stored in a local JSON file (`~/.config/daemon/credentials.json`), never in the webview
 - **Slack credentials** extracted from the already-authenticated desktop app — no OAuth app registration needed
 - **All external API calls** go through Rust — the frontend JavaScript never touches tokens directly
 - `.env` and credential files are gitignored
