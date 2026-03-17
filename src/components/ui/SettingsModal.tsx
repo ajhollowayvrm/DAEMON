@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { X, Check, AlertCircle, Loader2, Settings } from "lucide-react";
 import { invoke } from "@tauri-apps/api/core";
 import { NeonButton } from "./NeonButton";
+import { useTheme, getAllThemes } from "../../themes";
+import type { ThemeDefinition } from "../../themes/types";
 import styles from "./SettingsModal.module.css";
 
 interface AppSettings {
@@ -175,6 +177,40 @@ function BootSettings() {
   );
 }
 
+function ThemeSelector() {
+  const { themeId, setThemeId } = useTheme();
+  const allThemes: ThemeDefinition[] = getAllThemes();
+
+  return (
+    <div className={styles.themeGrid}>
+      {allThemes.map((t) => {
+        const isActive = t.id === themeId;
+        return (
+          <button
+            key={t.id}
+            className={`${styles.themeCard} ${isActive ? styles.themeCardActive : ""}`}
+            onClick={() => setThemeId(t.id)}
+          >
+            <div className={styles.themeColorStrip}>
+              {t.previewColors.map((color, i) => (
+                <span
+                  key={i}
+                  className={styles.themeColorSwatch}
+                  style={{ backgroundColor: color }}
+                />
+              ))}
+            </div>
+            <div className={styles.themeCardInfo}>
+              <span className={styles.themeCardName}>{t.name}</span>
+              <span className={styles.themeCardDesc}>{t.description}</span>
+            </div>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 export function SettingsModal({ onClose }: { onClose: () => void }) {
   const [settings, setSettings] = useState<AppSettings | null>(null);
 
@@ -203,7 +239,15 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
         </div>
 
         <div className={styles.modalContent}>
-          <div className={styles.sectionTitle}>API Credentials</div>
+          <div className={styles.sectionTitle}>Theme</div>
+          <div className={styles.sectionDesc}>
+            Choose a visual theme for the D.A.E.M.O.N. interface
+          </div>
+          <ThemeSelector />
+
+          <div className={styles.sectionTitle} style={{ marginTop: "24px" }}>
+            API Credentials
+          </div>
           <div className={styles.sectionDesc}>
             Tokens are stored locally in ~/.config/neondash/credentials.json
           </div>

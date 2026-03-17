@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { listen } from "@tauri-apps/api/event";
 import "./theme/globals.css";
+import { ThemeProvider } from "./themes";
 import { TitleBar, type PanelId } from "./components/layout/TitleBar";
 import { StatusBar } from "./components/layout/StatusBar";
 import { DashboardGrid } from "./components/layout/DashboardGrid";
@@ -62,35 +63,37 @@ function App() {
   }, []);
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          height: "100vh",
-          position: "relative",
-          zIndex: 1,
-        }}
-      >
-        <TitleBar openPanels={openPanels} onTogglePanel={togglePanel} />
-        <DashboardGrid>
-          {PANEL_ORDER.map((id) => {
-            if (openPanels.has(id)) {
-              const Component = PANEL_COMPONENTS[id];
-              return <Component key={id} />;
-            }
-            return <EmptySlot key={id} />;
-          })}
-        </DashboardGrid>
-        <StatusBar onOpenSettings={() => setShowSettings(true)} />
-        <ScanlineOverlay />
-        <HudDecorations />
-        <BootSequence />
-        {showSettings && (
-          <SettingsModal onClose={() => setShowSettings(false)} />
-        )}
-      </div>
-    </QueryClientProvider>
+    <ThemeProvider>
+      <QueryClientProvider client={queryClient}>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            height: "100vh",
+            position: "relative",
+            zIndex: 1,
+          }}
+        >
+          <TitleBar openPanels={openPanels} onTogglePanel={togglePanel} />
+          <DashboardGrid>
+            {PANEL_ORDER.map((id) => {
+              if (openPanels.has(id)) {
+                const Component = PANEL_COMPONENTS[id];
+                return <Component key={id} />;
+              }
+              return <EmptySlot key={id} />;
+            })}
+          </DashboardGrid>
+          <StatusBar onOpenSettings={() => setShowSettings(true)} />
+          <ScanlineOverlay />
+          <HudDecorations />
+          <BootSequence />
+          {showSettings && (
+            <SettingsModal onClose={() => setShowSettings(false)} />
+          )}
+        </div>
+      </QueryClientProvider>
+    </ThemeProvider>
   );
 }
 

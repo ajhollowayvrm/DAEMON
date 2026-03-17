@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import styles from "./HudDecorations.module.css";
+import { useTheme } from "../../themes";
 
 /** Generates a fake stat value that drifts slightly over time */
 function useFakeStat(base: number, range: number, label: string) {
@@ -16,18 +17,15 @@ function useFakeStat(base: number, range: number, label: string) {
   return `${label}: ${value.toFixed(1)}%`;
 }
 
-/** Characters used in the data stream columns */
-const STREAM_CHARS = "01/\\|-ABCDEFabcdef0123456789><{}[]";
-
-/** Generate a random character from the stream set */
-function randomStreamChar() {
-  return STREAM_CHARS[Math.floor(Math.random() * STREAM_CHARS.length)];
+/** Generate a random character from a stream character set */
+function randomStreamChar(chars: string) {
+  return chars[Math.floor(Math.random() * chars.length)];
 }
 
 /** Generate a column of stream characters */
-function generateStreamColumn() {
+function generateStreamColumn(chars: string) {
   const length = 15 + Math.floor(Math.random() * 20);
-  return Array.from({ length }, () => randomStreamChar()).join("\n");
+  return Array.from({ length }, () => randomStreamChar(chars)).join("\n");
 }
 
 /** Configuration for floating particles */
@@ -44,16 +42,10 @@ interface ParticleConfig {
   color: string;
 }
 
-const PARTICLE_COLORS = [
-  "rgba(0, 255, 245, VAR_OPACITY)",   // cyan
-  "rgba(255, 44, 241, VAR_OPACITY)",   // magenta
-  "rgba(176, 38, 255, VAR_OPACITY)",   // purple
-];
-
-function generateParticles(count: number): ParticleConfig[] {
+function generateParticles(count: number, particleColors: string[]): ParticleConfig[] {
   return Array.from({ length: count }, (_, i) => {
     const opacity = 0.08 + Math.random() * 0.12;
-    const colorTemplate = PARTICLE_COLORS[i % PARTICLE_COLORS.length];
+    const colorTemplate = particleColors[i % particleColors.length];
     return {
       id: i,
       size: 2 + Math.random() * 2,
@@ -80,7 +72,7 @@ interface StreamColumnConfig {
   side: "left" | "right";
 }
 
-function generateStreamColumns(count: number): StreamColumnConfig[] {
+function generateStreamColumns(count: number, streamChars: string): StreamColumnConfig[] {
   const cols: StreamColumnConfig[] = [];
   for (let i = 0; i < count; i++) {
     const side = i < count / 2 ? "left" : "right";
@@ -90,7 +82,7 @@ function generateStreamColumns(count: number): StreamColumnConfig[] {
         : 100 - 4 - ((i - count / 2) * 18);
     cols.push({
       id: i,
-      chars: generateStreamColumn(),
+      chars: generateStreamColumn(streamChars),
       left: baseLeft,
       speed: 8 + Math.random() * 14,
       opacity: 0.06 + Math.random() * 0.1,
@@ -102,14 +94,24 @@ function generateStreamColumns(count: number): StreamColumnConfig[] {
 }
 
 export function HudDecorations() {
-  const memStat = useFakeStat(94.2, 4, "MEM");
-  const cpuStat = useFakeStat(23.5, 12, "CPU");
-  const netStat = useFakeStat(87.0, 8, "NET");
-  const bufStat = useFakeStat(62.3, 10, "BUF");
+  const { theme } = useTheme();
+  const { stats, streamCharacters, streamColumnCount, particleCount, particleColors } = theme.hud;
 
-  // Generate stable configurations once
-  const streamColumns = useMemo(() => generateStreamColumns(8), []);
-  const particles = useMemo(() => generateParticles(10), []);
+  const [tl, tr, bl, br] = stats;
+  const memStat = useFakeStat(tl.base, tl.range, tl.label);
+  const cpuStat = useFakeStat(tr.base, tr.range, tr.label);
+  const netStat = useFakeStat(bl.base, bl.range, bl.label);
+  const bufStat = useFakeStat(br.base, br.range, br.label);
+
+  // Generate stable configurations once (re-generate when theme changes)
+  const streamColumns = useMemo(
+    () => generateStreamColumns(streamColumnCount, streamCharacters),
+    [streamColumnCount, streamCharacters],
+  );
+  const particles = useMemo(
+    () => generateParticles(particleCount, particleColors),
+    [particleCount, particleColors],
+  );
 
   // Periodically refresh stream characters
   const [streamChars, setStreamChars] = useState<string[]>(() =>
@@ -118,10 +120,10 @@ export function HudDecorations() {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setStreamChars(streamColumns.map(() => generateStreamColumn()));
+      setStreamChars(streamColumns.map(() => generateStreamColumn(streamCharacters)));
     }, 6000);
     return () => clearInterval(interval);
-  }, [streamColumns]);
+  }, [streamColumns, streamCharacters]);
 
   return (
     <div className={styles.hudContainer}>

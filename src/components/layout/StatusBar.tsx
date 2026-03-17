@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Settings } from "lucide-react";
 import styles from "./StatusBar.module.css";
+import { useTheme } from "../../themes";
 
 interface ServiceStatus {
   name: string;
@@ -38,11 +39,16 @@ function formatTime(date: Date): string {
 
 export function StatusBar({ onOpenSettings }: { onOpenSettings: () => void }) {
   const time = useClockTime();
+  const { theme } = useTheme();
+  const { leftTag, rightTag, tickerMessages } = theme.statusBar;
+
+  // Duplicate the ticker messages for seamless marquee looping
+  const tickerLoop = [...tickerMessages, ...tickerMessages];
 
   return (
     <div className={styles.statusBar}>
       <div className={styles.indicators}>
-        <span className={styles.hudTag}>SYS_ACTIVE</span>
+        <span className={styles.hudTag}>{leftTag}</span>
         {services.map((service) => (
           <div key={service.name} className={styles.indicator}>
             <span
@@ -59,22 +65,13 @@ export function StatusBar({ onOpenSettings }: { onOpenSettings: () => void }) {
       {/* Data ticker marquee */}
       <div className={styles.dataTicker}>
         <div className={styles.dataTickerInner}>
-          <span>// DAEMON v0.1.0 //</span>
-          <span>ALL SYSTEMS NOMINAL //</span>
-          <span>UPLINK SECURE //</span>
-          <span>LATENCY 12ms //</span>
-          <span>ENCRYPTION AES-256 //</span>
-          <span>QUANTUM MESH ACTIVE //</span>
-          <span>// DAEMON v0.1.0 //</span>
-          <span>ALL SYSTEMS NOMINAL //</span>
-          <span>UPLINK SECURE //</span>
-          <span>LATENCY 12ms //</span>
-          <span>ENCRYPTION AES-256 //</span>
-          <span>QUANTUM MESH ACTIVE //</span>
+          {tickerLoop.map((msg, idx) => (
+            <span key={idx}>{msg}</span>
+          ))}
         </div>
       </div>
       <div className={styles.rightSection}>
-        <span className={styles.hudTagAlt}>UPLINK_OK</span>
+        <span className={styles.hudTagAlt}>{rightTag}</span>
         <span className={styles.timestamp}>{time}</span>
         <span className={styles.syncTime}>Synced: 5s ago</span>
         <button className={styles.settingsBtn} onClick={onOpenSettings}>

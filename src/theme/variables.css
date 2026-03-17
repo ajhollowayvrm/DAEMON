@@ -23,6 +23,12 @@
   --neon-yellow: #ffe600;
   --neon-red: #ff1744;
 
+  /* ── RGB versions for rgba() usage ── */
+  --neon-magenta-rgb: 255, 44, 241;
+  --neon-cyan-rgb: 0, 255, 245;
+  --neon-purple-rgb: 176, 38, 255;
+  --neon-green-rgb: 57, 255, 20;
+
   /* ── Dimmed accents (for backgrounds, borders) ── */
   --neon-magenta-dim: rgba(255, 44, 241, 0.15);
   --neon-cyan-dim: rgba(0, 255, 245, 0.12);
