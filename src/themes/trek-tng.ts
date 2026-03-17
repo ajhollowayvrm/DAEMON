@@ -155,7 +155,7 @@ export const trekTngTheme: ThemeDefinition = {
       { text: '║  "Make it so."  — Capt. Jean-Luc Picard                 ║', tier: 1 },
       { text: "╚══════════════════════════════════════════════════════════╝", tier: 1 },
     ],
-    logoPath: "/assets/daemon-logo.png?v=5",
+    logoPath: "/assets/daemon-logo-trek.png",
     textColor: "#ff9933",
     okColor: "#33cc99",
     warnColor: "#cc3333",

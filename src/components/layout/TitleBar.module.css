@@ -121,7 +121,7 @@
    ═══════════════════════════════════════════════════════════════════ */
 
 .titleBarLcars {
-  height: 54px;
+  height: 44px;
   display: flex;
   align-items: stretch;
   padding: 0;
@@ -139,15 +139,15 @@
   display: none;
 }
 
-/* ── LCARS curved elbow on the left ── */
+/* ── LCARS curved elbow on the left — smaller ── */
 .lcarsElbow {
-  flex: 0 0 80px;
+  flex: 0 0 44px;
   background: #ff9933;
-  border-radius: 0 0 40px 0;
+  border-radius: 0 0 22px 0;
   -webkit-app-region: drag;
 }
 
-/* ── Segmented colored bar ── */
+/* ── Simplified bar ── */
 .lcarsBarSegments {
   display: flex;
   align-items: stretch;
@@ -159,14 +159,13 @@
 }
 
 .lcarsBarSeg {
-  /* Individual colored segment in the title bar */
   min-width: 20px;
 }
 
-/* ── LCARS panel toggles — pill buttons inside the bar ── */
+/* ── LCARS panel toggles — subtle, spaced out ── */
 .panelTogglesLcars {
   display: flex;
-  gap: 4px;
+  gap: 3px;
   align-items: stretch;
   -webkit-app-region: no-drag;
   padding: 0 3px;
@@ -177,24 +176,24 @@
   display: flex;
   align-items: center;
   gap: 5px;
-  padding: 0 16px;
+  padding: 0 14px;
   border: none;
   border-radius: 0;
   background: var(--lcars-btn-color, #ff9933);
   color: #000000;
   font-family: var(--font-display);
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
   letter-spacing: 1px;
   text-transform: uppercase;
   cursor: pointer;
-  opacity: 0.4;
+  opacity: 0.3;
   transition: opacity 0.15s;
   -webkit-app-region: no-drag;
 }
 
 .panelToggleLcars:hover {
-  opacity: 0.65;
+  opacity: 0.55;
 }
 
 .panelToggleLcarsActive {
@@ -207,7 +206,7 @@
 
 /* ── LCARS logo adjustment ── */
 .logoImgLcars {
-  height: 140px;
+  height: 120px;
   filter: none;
   -webkit-app-region: no-drag;
   transform: translate(15%, -38%);

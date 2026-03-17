@@ -147,7 +147,7 @@ export const trekTosTheme: ThemeDefinition = {
       { text: '║  "Fascinating."  — Spock                                ║', tier: 1 },
       { text: "╚══════════════════════════════════════════════════════════╝", tier: 1 },
     ],
-    logoPath: "/assets/daemon-logo.png?v=5",
+    logoPath: "/assets/daemon-logo-trek.png",
     textColor: "#f7a41d",
     okColor: "#27ae60",
     warnColor: "#c0392b",

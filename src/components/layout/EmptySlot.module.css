@@ -68,8 +68,8 @@
 
 .lcarsFrame {
   display: grid;
-  grid-template-columns: 40px 1fr;
-  grid-template-rows: 40px 2px 1fr;
+  grid-template-columns: 24px 1fr;
+  grid-template-rows: 30px 3px 1fr;
   background: #000000;
   gap: 0;
   height: 100%;
@@ -79,7 +79,7 @@
 .lcarsElbow {
   grid-column: 1;
   grid-row: 1;
-  border-radius: 0 0 40px 0;
+  border-radius: 0 0 24px 0;
 }
 
 .lcarsHeader {
@@ -120,9 +120,9 @@
 }
 
 .lcarsSidebarPill {
-  flex: 0 0 24px;
-  border-radius: 0 0 0 20px;
-  min-height: 24px;
+  flex: 0 0 20px;
+  border-radius: 0 0 0 12px;
+  min-height: 20px;
 }
 
 .lcarsContentArea {

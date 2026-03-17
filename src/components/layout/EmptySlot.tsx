@@ -2,7 +2,7 @@ import styles from "./EmptySlot.module.css";
 import { useTheme } from "../../themes";
 
 /** Dark gray LCARS colors for the offline/dimmed frame */
-const LCARS_DIM_COLORS = ["#333340", "#2a2a38", "#252535", "#303040"];
+const LCARS_DIM = { primary: "#2a2a38", accent: "#222230" };
 
 export function EmptySlot() {
   const { theme } = useTheme();
@@ -15,27 +15,23 @@ export function EmptySlot() {
           {/* Dimmed elbow */}
           <div
             className={styles.lcarsElbow}
-            style={{ background: LCARS_DIM_COLORS[0] }}
+            style={{ background: LCARS_DIM.primary }}
           />
 
-          {/* Dimmed header bar */}
+          {/* Dimmed header bar — accent chip + fill with pill end */}
           <div className={styles.lcarsHeader}>
-            <div className={styles.lcarsHeaderSeg} style={{ background: LCARS_DIM_COLORS[1], flex: "0 0 80px" }} />
-            <div className={styles.lcarsHeaderSeg} style={{ background: LCARS_DIM_COLORS[2], flex: "0 0 50px" }} />
-            <div className={styles.lcarsHeaderSeg} style={{ background: LCARS_DIM_COLORS[3], flex: "1 1 auto" }} />
-            <div className={styles.lcarsHeaderSeg} style={{ background: LCARS_DIM_COLORS[0], flex: "0 0 40px", borderRadius: "0 20px 20px 0" }} />
+            <div className={styles.lcarsHeaderSeg} style={{ background: LCARS_DIM.accent, flex: "0 0 40px" }} />
+            <div className={styles.lcarsHeaderSeg} style={{ background: LCARS_DIM.primary, flex: "1 1 auto", borderRadius: "0 15px 15px 0" }} />
           </div>
 
           {/* Separator */}
-          <div className={styles.lcarsSepLeft} style={{ background: LCARS_DIM_COLORS[0] }} />
+          <div className={styles.lcarsSepLeft} style={{ background: LCARS_DIM.primary }} />
           <div className={styles.lcarsSepRight} />
 
-          {/* Dimmed sidebar */}
+          {/* Dimmed sidebar — main fill + accent pill */}
           <div className={styles.lcarsSidebar}>
-            <div className={styles.lcarsSidebarSeg} style={{ background: LCARS_DIM_COLORS[0], flex: "1 1 auto" }} />
-            <div className={styles.lcarsSidebarSeg} style={{ background: LCARS_DIM_COLORS[1], flex: "0 0 30px" }} />
-            <div className={styles.lcarsSidebarSeg} style={{ background: LCARS_DIM_COLORS[2], flex: "0 0 20px" }} />
-            <div className={styles.lcarsSidebarPill} style={{ background: LCARS_DIM_COLORS[3] }} />
+            <div className={styles.lcarsSidebarSeg} style={{ background: LCARS_DIM.primary, flex: "1 1 auto" }} />
+            <div className={styles.lcarsSidebarPill} style={{ background: LCARS_DIM.accent }} />
           </div>
 
           {/* Content area with OFFLINE text */}

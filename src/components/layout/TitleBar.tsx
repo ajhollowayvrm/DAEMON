@@ -16,8 +16,8 @@ const PANELS: { id: PanelId; label: string; icon: typeof MessageSquare }[] = [
   { id: "linear", label: "Linear", icon: LayoutList },
 ];
 
-/** LCARS button color cycle: orange, tan, blue, purple */
-const LCARS_BUTTON_COLORS = ["#ff9933", "#cc6699", "#9999ff", "#9966cc"];
+/** LCARS button color: muted, uniform — content over chrome */
+const LCARS_BUTTON_COLORS = ["#ff9933", "#9999ff", "#9966cc", "#cc9966"];
 
 export function TitleBar({ openPanels, onTogglePanel }: TitleBarProps) {
   const { theme } = useTheme();
@@ -26,16 +26,14 @@ export function TitleBar({ openPanels, onTogglePanel }: TitleBarProps) {
   if (isLcars) {
     return (
       <div className={styles.titleBarLcars} data-tauri-drag-region>
-        {/* Large curved elbow on the left */}
+        {/* Smaller curved elbow on the left */}
         <div className={styles.lcarsElbow} />
 
-        {/* Segmented colored bar across the top */}
+        {/* Simplified bar: elbow color, toggles, fill, pill end */}
         <div className={styles.lcarsBarSegments}>
-          <div className={styles.lcarsBarSeg} style={{ background: "#ff9933", flex: "0 0 120px" }} />
-          <div className={styles.lcarsBarSeg} style={{ background: "#9999ff", flex: "0 0 60px" }} />
-          <div className={styles.lcarsBarSeg} style={{ background: "#cc6699", flex: "0 0 80px" }} />
+          <div className={styles.lcarsBarSeg} style={{ background: "#cc9966", flex: "0 0 60px" }} />
 
-          {/* Panel toggle buttons sit inside the bar */}
+          {/* Panel toggle buttons — subtle text inside the bar */}
           <div className={styles.panelTogglesLcars}>
             {PANELS.map(({ id, label, icon: Icon }, idx) => (
               <button
@@ -45,22 +43,22 @@ export function TitleBar({ openPanels, onTogglePanel }: TitleBarProps) {
                 title={`${openPanels.has(id) ? "Close" : "Open"} ${label}`}
                 style={{ "--lcars-btn-color": LCARS_BUTTON_COLORS[idx % LCARS_BUTTON_COLORS.length] } as React.CSSProperties}
               >
-                <Icon size={13} />
+                <Icon size={12} />
                 <span className={styles.panelToggleLabel}>{label}</span>
               </button>
             ))}
           </div>
 
           {/* Fill segment that stretches */}
-          <div className={styles.lcarsBarSeg} style={{ background: "#9966cc", flex: "1 1 auto" }} />
+          <div className={styles.lcarsBarSeg} style={{ background: "#ff9933", flex: "1 1 auto" }} />
           {/* Pill-shaped right end */}
-          <div className={styles.lcarsBarSeg} style={{ background: "#ff9933", flex: "0 0 50px", borderRadius: "0 25px 25px 0" }} />
+          <div className={styles.lcarsBarSeg} style={{ background: "#cc9966", flex: "0 0 40px", borderRadius: "0 22px 22px 0" }} />
         </div>
 
         {/* Logo — right side */}
         <div className={styles.logoSection}>
           <img
-            src="/assets/daemon-logo.png?v=5"
+            src={theme.bootSequence.logoPath}
             alt="D.A.E.M.O.N."
             className={styles.logoImgLcars}
           />
@@ -89,7 +87,7 @@ export function TitleBar({ openPanels, onTogglePanel }: TitleBarProps) {
       {/* Logo — right side */}
       <div className={styles.logoSection}>
         <img
-          src="/assets/daemon-logo.png?v=5"
+          src={theme.bootSequence.logoPath}
           alt="D.A.E.M.O.N."
           className={styles.logoImg}
         />

@@ -181,14 +181,14 @@
    ═══════════════════════════════════════════════════════════════════ */
 
 .statusBarLcars {
-  height: 44px;
+  height: 36px;
   display: flex;
   align-items: stretch;
   padding: 0;
   background: #000000;
   border-top: none;
   font-family: var(--font-display);
-  font-size: 12px;
+  font-size: 11px;
   color: #fff2cc;
   position: relative;
   z-index: 100;
@@ -199,7 +199,7 @@
   display: none;
 }
 
-/* ── Segmented bar layout ── */
+/* ── Simplified bar layout ── */
 .lcarsStatusSegments {
   display: flex;
   align-items: stretch;
@@ -208,77 +208,48 @@
   background: #000000;
 }
 
-.lcarsStatusSeg {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 20px;
-}
-
-.lcarsStatusSyncText {
-  color: #000000;
-  font-family: var(--font-display);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  white-space: nowrap;
-  padding: 0 8px;
-}
-
-.lcarsStatusTagSeg {
+/* ── Pill-shaped left end with tag text ── */
+.lcarsStatusPillLeft {
   display: flex;
   align-items: center;
   padding: 0 14px;
+  border-radius: 18px 0 0 18px;
   flex: 0 0 auto;
 }
 
 .lcarsStatusTagText {
   color: #000000;
   font-family: var(--font-display);
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 700;
   letter-spacing: 2px;
   text-transform: uppercase;
   white-space: nowrap;
 }
 
-/* ── Service indicators as pill badges ── */
+/* ── Service indicators as small text labels ── */
 .lcarsStatusIndicators {
   display: flex;
-  gap: 4px;
+  gap: 12px;
   align-items: center;
-  padding: 0 4px;
+  padding: 0 12px;
   background: #000000;
 }
 
-.lcarsStatusPill {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  padding: 4px 12px;
-  border-radius: 20px;
+.lcarsStatusLabel {
   font-family: var(--font-display);
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
   letter-spacing: 1px;
   text-transform: uppercase;
-  color: #000000;
 }
 
-.lcarsStatusPillConnected {
-  background: #33cc99;
+.lcarsStatusLabelConnected {
+  color: #33cc99;
 }
 
-.lcarsStatusPillDisconnected {
-  background: #666666;
-}
-
-.lcarsStatusPillDot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: #000000;
+.lcarsStatusLabelDisconnected {
+  color: #555555;
 }
 
 /* ── Ticker inside fill segment ── */
@@ -288,6 +259,7 @@
   flex: 1 1 auto;
   min-width: 0;
   overflow: hidden;
+  border-radius: 0;
 }
 
 .lcarsTickerMask {
@@ -303,7 +275,7 @@
   animation: marquee-scroll 20s linear infinite;
   color: #000000;
   font-family: var(--font-display);
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
   letter-spacing: 1px;
   text-transform: uppercase;
@@ -313,26 +285,41 @@
   padding-right: 24px;
 }
 
-/* ── Settings button — pill-shaped ── */
+/* ── Time text label ── */
+.lcarsStatusTimeText {
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  background: #000000;
+  color: #ff9933;
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Settings button — minimal ── */
 .settingsBtnLcars {
   flex: 0 0 auto;
-  background: #9966cc;
+  background: #000000;
   border: none;
-  color: #000000;
+  color: #9966cc;
   cursor: pointer;
-  padding: 0 14px;
+  padding: 0 10px;
   display: flex;
   align-items: center;
   font-weight: 700;
+  transition: color 0.15s;
 }
 
 .settingsBtnLcars:hover {
-  background: #9999ff;
+  color: #9999ff;
 }
 
-/* ── Curved elbow on right ── */
+/* ── Pill-shaped right end ── */
 .lcarsStatusElbow {
-  flex: 0 0 80px;
+  flex: 0 0 44px;
   background: #ff9933;
-  border-radius: 40px 0 0 0;
+  border-radius: 18px 0 0 18px;
 }

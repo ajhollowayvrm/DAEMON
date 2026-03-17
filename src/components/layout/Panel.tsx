@@ -13,20 +13,20 @@ interface PanelProps {
 }
 
 /**
- * LCARS color palette for bar segments.
- * Each panel rotates the starting color based on its DOM index.
+ * Minimal LCARS color scheme per panel.
+ * Each panel uses ONE primary color and ONE accent — not a rainbow.
  */
-const LCARS_COLORS = ["#ff9933", "#cc6699", "#9999ff", "#9966cc"];
+const LCARS_PANEL_COLORS: Record<string, { primary: string; accent: string }> = {
+  "Slack":       { primary: "#ff9933", accent: "#cc9966" },   // orange + tan
+  "GitLab MRs":  { primary: "#9999ff", accent: "#9966cc" },   // blue + purple
+  "Agent Teams": { primary: "#9966cc", accent: "#ff9933" },   // purple + orange
+  "Linear":      { primary: "#cc9966", accent: "#9999ff" },   // tan + blue
+};
 
-/**
- * Generate a rotated color array for segment variety across panels.
- * panelIndex 0 => [orange, mauve, blue, purple]
- * panelIndex 1 => [mauve, blue, purple, orange]
- * etc.
- */
-function getLcarsColors(panelIndex: number): string[] {
-  const offset = panelIndex % LCARS_COLORS.length;
-  return [...LCARS_COLORS.slice(offset), ...LCARS_COLORS.slice(0, offset)];
+const LCARS_DEFAULT_COLORS = { primary: "#ff9933", accent: "#cc9966" };
+
+function getLcarsPanelColors(title: string) {
+  return LCARS_PANEL_COLORS[title] ?? LCARS_DEFAULT_COLORS;
 }
 
 export function Panel({ title, icon: Icon, badge, badgeVariant = "default", children, style }: PanelProps) {
@@ -85,9 +85,7 @@ interface LcarsPanelProps {
 }
 
 function LcarsPanel({ title, icon: Icon, badge, badgeVariant = "default", children, style }: LcarsPanelProps) {
-  // Use a simple index derived from the title for color rotation
-  const panelIndex = title.charCodeAt(0) % 4;
-  const colors = getLcarsColors(panelIndex);
+  const { primary, accent } = getLcarsPanelColors(title);
 
   return (
     <div className={styles.panelLcars} style={style}>
@@ -95,58 +93,47 @@ function LcarsPanel({ title, icon: Icon, badge, badgeVariant = "default", childr
         {/* Top-left elbow: connects sidebar to header bar */}
         <div
           className={styles.lcarsElbowCorner}
-          style={{ background: colors[0] }}
+          style={{ background: primary }}
         />
 
-        {/* Header bar (top) — segmented colored blocks with title */}
+        {/* Header bar (top) — accent chip + main fill with title + pill end */}
         <div className={styles.lcarsHeaderBar}>
           <div className={styles.lcarsHeaderSegments}>
             <div
               className={styles.lcarsHeaderSegment}
-              style={{ background: colors[1], flex: "0 0 80px" }}
+              style={{ background: accent, flex: "0 0 40px" }}
             />
             <div
-              className={styles.lcarsHeaderSegment}
-              style={{ background: colors[2], flex: "0 0 50px" }}
-            />
-            <div className={styles.lcarsHeaderTitle}>
-              <Icon size={14} className={styles.iconLcars} />
-              <span className={styles.titleLcars}>{title}</span>
+              className={styles.lcarsHeaderFill}
+              style={{ background: primary }}
+            >
+              <div className={styles.lcarsHeaderTitle}>
+                <Icon size={13} className={styles.iconLcars} />
+                <span className={styles.titleLcars}>{title}</span>
+                {badge !== undefined && (
+                  <span className={`${styles.badgeLcars} ${badgeVariant === "green" ? styles.badgeLcarsGreen : ""}`}>
+                    {badge}
+                  </span>
+                )}
+              </div>
             </div>
-            {badge !== undefined && (
-              <span className={`${styles.badgeLcars} ${badgeVariant === "green" ? styles.badgeLcarsGreen : ""}`}>
-                {badge}
-              </span>
-            )}
-            <div
-              className={styles.lcarsHeaderSegment}
-              style={{ background: colors[3], flex: "0 0 40px", borderRadius: "0 20px 20px 0" }}
-            />
           </div>
         </div>
 
         {/* Thin separator line below header */}
-        <div className={styles.lcarsSeparatorLeft} style={{ background: colors[0] }} />
+        <div className={styles.lcarsSeparatorLeft} style={{ background: primary }} />
         <div className={styles.lcarsSeparatorRight} />
 
-        {/* Sidebar (left) — segmented colored blocks */}
+        {/* Sidebar (left) — main fill + accent pill at bottom */}
         <div className={styles.lcarsSidebar}>
           <div
             className={styles.lcarsSidebarSegment}
-            style={{ background: colors[0], flex: "1 1 auto" }}
-          />
-          <div
-            className={styles.lcarsSidebarSegment}
-            style={{ background: colors[1], flex: "0 0 30px" }}
-          />
-          <div
-            className={styles.lcarsSidebarSegment}
-            style={{ background: colors[2], flex: "0 0 20px" }}
+            style={{ background: primary, flex: "1 1 auto" }}
           />
           {/* Pill-shaped bottom end */}
           <div
             className={styles.lcarsSidebarPill}
-            style={{ background: colors[3] }}
+            style={{ background: accent }}
           />
         </div>
 

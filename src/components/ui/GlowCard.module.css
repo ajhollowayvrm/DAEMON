@@ -96,27 +96,17 @@
 
 .cardLcars {
   border: none;
-  border-radius: 4px;
+  border-left: 2px solid rgba(153, 153, 255, 0.25);
+  border-radius: 2px;
   box-shadow: none;
   background: rgba(14, 14, 26, 0.9);
-  padding-top: calc(var(--gap-md) + 6px);
+  padding: var(--gap-md) var(--gap-lg);
   position: relative;
 }
 
-/* Thin colored top bar with pill-shaped ends */
+/* No top bar — clean cards */
 .cardLcars::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: #ff9933;
-  border-radius: 4px 4px 0 0;
-  transform: none;
-  animation: none;
-  opacity: 1;
-  pointer-events: none;
+  display: none;
 }
 
 /* No click flash for LCARS */
@@ -125,20 +115,18 @@
 }
 
 .cardLcars:hover {
-  border-color: transparent;
+  border-color: rgba(153, 153, 255, 0.4);
   box-shadow: none;
-  background: rgba(22, 22, 40, 0.95);
+  background: rgba(18, 18, 34, 0.95);
 }
 
-/* ── LCARS urgent: red top bar, no glow animation ── */
+/* ── LCARS urgent: red left border, no glow animation ── */
 .urgentLcars {
   animation: none;
-}
-
-.urgentLcars::before {
-  background: #cc3333;
+  border-left-color: rgba(204, 51, 51, 0.6);
 }
 
 .urgentLcars:hover {
   box-shadow: none;
+  border-left-color: rgba(204, 51, 51, 0.8);
 }

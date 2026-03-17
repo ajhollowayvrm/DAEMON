@@ -50,31 +50,25 @@ export function StatusBar({ onOpenSettings }: { onOpenSettings: () => void }) {
   if (isLcars) {
     return (
       <div className={styles.statusBarLcars}>
-        {/* Segmented colored bar — mirrors title bar pattern */}
         <div className={styles.lcarsStatusSegments}>
-          {/* Pill-shaped left end */}
-          <div className={styles.lcarsStatusSeg} style={{ background: "#9966cc", flex: "0 0 50px", borderRadius: "25px 0 0 25px" }} />
-          <div className={styles.lcarsStatusSeg} style={{ background: "#9999ff", flex: "0 0 60px" }} />
-
-          {/* Left tag inside a segment */}
-          <div className={styles.lcarsStatusTagSeg} style={{ background: "#cc6699" }}>
+          {/* Pill-shaped left end with tag */}
+          <div className={styles.lcarsStatusPillLeft} style={{ background: "#cc9966" }}>
             <span className={styles.lcarsStatusTagText}>{leftTag}</span>
           </div>
 
-          {/* Service indicators as pill badges */}
+          {/* Service indicators as small text labels */}
           <div className={styles.lcarsStatusIndicators}>
             {services.map((service) => (
-              <div
+              <span
                 key={service.name}
-                className={`${styles.lcarsStatusPill} ${service.connected ? styles.lcarsStatusPillConnected : styles.lcarsStatusPillDisconnected}`}
+                className={`${styles.lcarsStatusLabel} ${service.connected ? styles.lcarsStatusLabelConnected : styles.lcarsStatusLabelDisconnected}`}
               >
-                <span className={styles.lcarsStatusPillDot} />
-                <span>{service.name}</span>
-              </div>
+                {service.name}
+              </span>
             ))}
           </div>
 
-          {/* Ticker inside a fill segment */}
+          {/* Ticker in the main fill bar */}
           <div className={styles.lcarsStatusFillSeg} style={{ background: "#ff9933" }}>
             <div className={styles.lcarsTickerMask}>
               <div className={styles.lcarsTickerInner}>
@@ -85,27 +79,15 @@ export function StatusBar({ onOpenSettings }: { onOpenSettings: () => void }) {
             </div>
           </div>
 
-          {/* Right tag */}
-          <div className={styles.lcarsStatusTagSeg} style={{ background: "#9966cc" }}>
-            <span className={styles.lcarsStatusTagText}>{rightTag}</span>
-          </div>
-
           {/* Time */}
-          <div className={styles.lcarsStatusTagSeg} style={{ background: "#9999ff" }}>
-            <span className={styles.lcarsStatusTagText}>{time}</span>
-          </div>
-
-          {/* Sync */}
-          <div className={styles.lcarsStatusSeg} style={{ background: "#cc6699", flex: "0 0 80px" }}>
-            <span className={styles.lcarsStatusSyncText}>Synced: 5s</span>
-          </div>
+          <div className={styles.lcarsStatusTimeText}>{time}</div>
 
           {/* Settings button */}
           <button className={styles.settingsBtnLcars} onClick={onOpenSettings}>
-            <Settings size={14} />
+            <Settings size={13} />
           </button>
 
-          {/* Curved elbow on the right */}
+          {/* Pill-shaped right end */}
           <div className={styles.lcarsStatusElbow} />
         </div>
       </div>

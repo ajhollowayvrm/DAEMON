@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 300" fill="none">
+  <!-- Enterprise-D silhouette - stylized side view -->
+  <defs>
+    <linearGradient id="hullGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#9999ff" stop-opacity="0.3"/>
+      <stop offset="50%" stop-color="#cc99cc" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#ff9933" stop-opacity="0.3"/>
+    </linearGradient>
+    <linearGradient id="nacGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#9999ff" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#ff9933" stop-opacity="0.6"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="bigGlow">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Saucer section (large ellipse) -->
+  <ellipse cx="320" cy="150" rx="180" ry="50" fill="url(#hullGrad)" stroke="#9999ff" stroke-width="1" opacity="0.7"/>
+  <!-- Saucer bridge dome -->
+  <ellipse cx="320" cy="140" rx="40" ry="12" fill="#cc6699" opacity="0.4" filter="url(#glow)"/>
+  <!-- Saucer deflector strip -->
+  <line x1="140" y1="150" x2="500" y2="150" stroke="#ff9933" stroke-width="1" opacity="0.3"/>
+
+  <!-- Neck connecting saucer to engineering hull -->
+  <path d="M 340 200 L 380 200 L 400 230 L 360 230 Z" fill="url(#hullGrad)" stroke="#9999ff" stroke-width="0.5" opacity="0.5"/>
+
+  <!-- Engineering hull (secondary hull) -->
+  <ellipse cx="450" cy="240" rx="120" ry="30" fill="url(#hullGrad)" stroke="#9999ff" stroke-width="1" opacity="0.6"/>
+  <!-- Main deflector dish -->
+  <ellipse cx="335" cy="245" rx="15" ry="20" fill="#9999ff" opacity="0.5" filter="url(#glow)"/>
+
+  <!-- Nacelle pylons -->
+  <line x1="420" y1="210" x2="480" y2="80" stroke="#9999ff" stroke-width="2" opacity="0.4"/>
+  <line x1="420" y1="270" x2="480" y2="220" stroke="#9999ff" stroke-width="2" opacity="0.4" transform="translate(0,80) scale(1,-1) translate(0,-300)"/>
+
+  <!-- Upper nacelle -->
+  <rect x="470" y="60" width="200" height="18" rx="9" fill="url(#nacGrad)" stroke="#9999ff" stroke-width="0.5" opacity="0.6"/>
+  <!-- Nacelle Bussard collector (front glow) -->
+  <circle cx="475" cy="69" r="8" fill="#ff9933" opacity="0.6" filter="url(#glow)"/>
+  <!-- Nacelle warp glow -->
+  <rect x="490" y="64" width="170" height="10" rx="5" fill="#9999ff" opacity="0.3" filter="url(#bigGlow)"/>
+
+  <!-- Lower nacelle -->
+  <rect x="470" y="222" width="200" height="18" rx="9" fill="url(#nacGrad)" stroke="#9999ff" stroke-width="0.5" opacity="0.6"/>
+  <!-- Nacelle Bussard collector (front glow) -->
+  <circle cx="475" cy="231" r="8" fill="#ff9933" opacity="0.6" filter="url(#glow)"/>
+  <!-- Nacelle warp glow -->
+  <rect x="490" y="226" width="170" height="10" rx="5" fill="#9999ff" opacity="0.3" filter="url(#bigGlow)"/>
+
+  <!-- Registry text -->
+  <text x="320" y="158" text-anchor="middle" font-family="Antonio, sans-serif" font-size="10" fill="#ff9933" opacity="0.6" letter-spacing="3">NCC-1701-D</text>
+</svg>
