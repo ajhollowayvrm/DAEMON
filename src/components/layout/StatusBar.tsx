@@ -47,18 +47,83 @@ export function StatusBar({ onOpenSettings }: { onOpenSettings: () => void }) {
 
   const isLcars = theme.layoutStyle === "lcars";
 
+  if (isLcars) {
+    return (
+      <div className={styles.statusBarLcars}>
+        {/* Segmented colored bar — mirrors title bar pattern */}
+        <div className={styles.lcarsStatusSegments}>
+          {/* Pill-shaped left end */}
+          <div className={styles.lcarsStatusSeg} style={{ background: "#9966cc", flex: "0 0 50px", borderRadius: "25px 0 0 25px" }} />
+          <div className={styles.lcarsStatusSeg} style={{ background: "#9999ff", flex: "0 0 60px" }} />
+
+          {/* Left tag inside a segment */}
+          <div className={styles.lcarsStatusTagSeg} style={{ background: "#cc6699" }}>
+            <span className={styles.lcarsStatusTagText}>{leftTag}</span>
+          </div>
+
+          {/* Service indicators as pill badges */}
+          <div className={styles.lcarsStatusIndicators}>
+            {services.map((service) => (
+              <div
+                key={service.name}
+                className={`${styles.lcarsStatusPill} ${service.connected ? styles.lcarsStatusPillConnected : styles.lcarsStatusPillDisconnected}`}
+              >
+                <span className={styles.lcarsStatusPillDot} />
+                <span>{service.name}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* Ticker inside a fill segment */}
+          <div className={styles.lcarsStatusFillSeg} style={{ background: "#ff9933" }}>
+            <div className={styles.lcarsTickerMask}>
+              <div className={styles.lcarsTickerInner}>
+                {tickerLoop.map((msg, idx) => (
+                  <span key={idx}>{msg}</span>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Right tag */}
+          <div className={styles.lcarsStatusTagSeg} style={{ background: "#9966cc" }}>
+            <span className={styles.lcarsStatusTagText}>{rightTag}</span>
+          </div>
+
+          {/* Time */}
+          <div className={styles.lcarsStatusTagSeg} style={{ background: "#9999ff" }}>
+            <span className={styles.lcarsStatusTagText}>{time}</span>
+          </div>
+
+          {/* Sync */}
+          <div className={styles.lcarsStatusSeg} style={{ background: "#cc6699", flex: "0 0 80px" }}>
+            <span className={styles.lcarsStatusSyncText}>Synced: 5s</span>
+          </div>
+
+          {/* Settings button */}
+          <button className={styles.settingsBtnLcars} onClick={onOpenSettings}>
+            <Settings size={14} />
+          </button>
+
+          {/* Curved elbow on the right */}
+          <div className={styles.lcarsStatusElbow} />
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className={`${styles.statusBar} ${isLcars ? styles.statusBarLcars : ""}`}>
-      <div className={`${styles.indicators} ${isLcars ? styles.indicatorsLcars : ""}`}>
-        <span className={`${styles.hudTag} ${isLcars ? styles.hudTagLcars : ""}`}>{leftTag}</span>
+    <div className={styles.statusBar}>
+      <div className={styles.indicators}>
+        <span className={styles.hudTag}>{leftTag}</span>
         {services.map((service) => (
-          <div key={service.name} className={`${styles.indicator} ${isLcars ? styles.indicatorLcars : ""}`}>
+          <div key={service.name} className={styles.indicator}>
             <span
               className={`${styles.dot} ${
                 service.connected
                   ? styles.dotConnected
                   : styles.dotDisconnected
-              } ${isLcars ? styles.dotLcars : ""}`}
+              }`}
             />
             <span>{service.name}</span>
           </div>
@@ -66,17 +131,17 @@ export function StatusBar({ onOpenSettings }: { onOpenSettings: () => void }) {
       </div>
       {/* Data ticker marquee */}
       <div className={styles.dataTicker}>
-        <div className={`${styles.dataTickerInner} ${isLcars ? styles.dataTickerInnerLcars : ""}`}>
+        <div className={styles.dataTickerInner}>
           {tickerLoop.map((msg, idx) => (
             <span key={idx}>{msg}</span>
           ))}
         </div>
       </div>
       <div className={styles.rightSection}>
-        <span className={`${styles.hudTagAlt} ${isLcars ? styles.hudTagAltLcars : ""}`}>{rightTag}</span>
+        <span className={styles.hudTagAlt}>{rightTag}</span>
         <span className={styles.timestamp}>{time}</span>
         <span className={styles.syncTime}>Synced: 5s ago</span>
-        <button className={`${styles.settingsBtn} ${isLcars ? styles.settingsBtnLcars : ""}`} onClick={onOpenSettings}>
+        <button className={styles.settingsBtn} onClick={onOpenSettings}>
           <Settings size={14} />
         </button>
       </div>

@@ -14,10 +14,10 @@ export const trekTngTheme: ThemeDefinition = {
   layoutStyle: "lcars",
 
   cssVariables: {
-    // Background palette
-    "--bg-deepest": "#0a0a12",
-    "--bg-deep": "#0f0f1a",
-    "--bg-base": "#161622",
+    // Background palette — pure black for authentic LCARS
+    "--bg-deepest": "#000000",
+    "--bg-deep": "#050508",
+    "--bg-base": "#0a0a14",
     "--bg-raised": "#1e1e30",
     "--bg-surface": "#262640",
     "--bg-hover": "#30304e",
@@ -63,9 +63,9 @@ export const trekTngTheme: ThemeDefinition = {
     "--panel-glow":
       "0 0 1px rgba(255, 153, 51, 0.6), 0 0 4px rgba(255, 153, 51, 0.3), 0 0 12px rgba(255, 153, 51, 0.15), inset 0 0 8px rgba(255, 153, 51, 0.05)",
 
-    // Typography
-    "--font-display": '"Orbitron", sans-serif',
-    "--font-body": '"Rajdhani", sans-serif',
+    // Typography — Antonio is a tall condensed font for authentic LCARS look
+    "--font-display": "'Antonio', sans-serif",
+    "--font-body": "'Antonio', sans-serif",
     "--font-mono": '"JetBrains Mono Variable", monospace',
   },
 

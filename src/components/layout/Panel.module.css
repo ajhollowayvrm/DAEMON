@@ -215,15 +215,19 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   LCARS Layout Variant
+   LCARS Layout Variant — Authentic L-shaped frame with segmented
+   colored bars, curved elbow, pill ends. NO glow, NO shadow,
+   NO gradients, NO animations. Flat solid colors on black.
    ═══════════════════════════════════════════════════════════════════ */
 
 .panelLcars {
+  background: #000000;
   border: none;
-  border-radius: 30px 8px 8px 30px;
+  border-radius: 0;
   box-shadow: none;
-  border-left: 6px solid var(--neon-orange);
-  background: var(--bg-base);
+  overflow: hidden;
+  height: 100%;
+  animation: none;
 }
 
 /* Remove the neon accent line for LCARS */
@@ -236,52 +240,136 @@
   display: none;
 }
 
-/* LCARS hover: no glow, subtle background change */
+/* LCARS hover: no glow at all */
 .panelLcars:hover {
   border-color: transparent;
-  border-left-color: var(--neon-orange);
   box-shadow: none;
-  background: var(--bg-raised);
+  background: #000000;
 }
 
-/* ── LCARS Header: thick colored top bar ── */
-.headerLcars {
-  background: var(--neon-orange);
-  border-bottom: none;
-  padding: 4px var(--gap-lg) 4px 24px;
+/* ── LCARS Frame: CSS Grid layout ── */
+.lcarsFrame {
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  grid-template-rows: 40px 2px 1fr;
+  background: #000000;
+  gap: 0;
+  height: 100%;
+  width: 100%;
+}
+
+/* ── Elbow: quarter-circle connecting sidebar to header ── */
+.lcarsElbowCorner {
+  grid-column: 1;
+  grid-row: 1;
+  border-radius: 0 0 40px 0;
+  /* We clip a quarter-circle: the corner has a large bottom-right radius
+     so the background color fills the top-left and curves away */
+}
+
+/* ── Header bar (top row, column 2) ── */
+.lcarsHeaderBar {
+  grid-column: 2;
+  grid-row: 1;
+  display: flex;
+  align-items: stretch;
+  overflow: hidden;
+}
+
+.lcarsHeaderSegments {
+  display: flex;
+  align-items: stretch;
+  gap: 3px;
+  width: 100%;
+  background: #000000;
+}
+
+.lcarsHeaderSegment {
+  /* Individual colored block in the header bar */
+  min-width: 20px;
+}
+
+.lcarsHeaderTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1 1 auto;
+  padding: 0 12px;
+  justify-content: flex-end;
+}
+
+/* ── Separator line below header ── */
+.lcarsSeparatorLeft {
+  grid-column: 1;
+  grid-row: 2;
+  /* colored to match elbow */
+}
+
+.lcarsSeparatorRight {
+  grid-column: 2;
+  grid-row: 2;
+  background: #000000;
+}
+
+/* ── Sidebar (left column, row 3) ── */
+.lcarsSidebar {
+  grid-column: 1;
+  grid-row: 3;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  background: #000000;
+  padding-bottom: 0;
+}
+
+.lcarsSidebarSegment {
+  /* Individual colored block in the sidebar */
+  min-height: 12px;
+}
+
+.lcarsSidebarPill {
+  flex: 0 0 24px;
+  border-radius: 0 0 0 20px;
   min-height: 24px;
-  animation: none;
-  flex-direction: row-reverse;
-  border-radius: 24px 6px 0 0;
 }
 
-/* Remove the scanning line for LCARS */
-.headerLcars::after {
-  display: none;
+/* ── Content area ── */
+.lcarsContent {
+  grid-column: 2;
+  grid-row: 3;
+  overflow-y: auto;
+  padding: 8px 10px;
+  background: rgba(10, 10, 18, 0.85);
 }
 
+/* ── LCARS Typography ── */
 .iconLcars {
-  color: var(--bg-deepest);
+  color: #fff2cc;
   filter: none;
 }
 
 .titleLcars {
-  color: var(--bg-deepest);
-  font-size: 12px;
-  letter-spacing: 4px;
-  font-weight: 800;
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #fff2cc;
 }
 
 .badgeLcars {
-  background: var(--bg-deepest);
-  color: var(--neon-orange);
+  background: #000000;
+  color: #ff9933;
   border: none;
   border-radius: 20px;
+  font-family: var(--font-display);
+  font-size: 13px;
   font-weight: 700;
-  margin-left: 0;
-  margin-right: auto;
+  padding: 4px 14px;
+  letter-spacing: 1px;
+  align-self: center;
 }
 
-.contentLcars {
-  padding: var(--gap-md) var(--gap-md) var(--gap-md) 24px;
+.badgeLcarsGreen {
+  color: #33cc99;
 }

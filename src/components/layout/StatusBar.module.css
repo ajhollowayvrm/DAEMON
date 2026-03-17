@@ -176,74 +176,163 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   LCARS Layout Variant
+   LCARS Layout Variant — Segmented colored bar with pill badges,
+   curved elbow on right side. NO animations, NO pulse effects.
    ═══════════════════════════════════════════════════════════════════ */
 
 .statusBarLcars {
-  background: var(--bg-deep);
+  height: 44px;
+  display: flex;
+  align-items: stretch;
+  padding: 0;
+  background: #000000;
   border-top: none;
+  font-family: var(--font-display);
+  font-size: 12px;
+  color: #fff2cc;
+  position: relative;
+  z-index: 100;
 }
 
-/* Replace animated gradient with solid LCARS bar */
+/* No animated gradient line */
 .statusBarLcars::before {
-  height: 4px;
-  background: var(--neon-cyan);
-  background-size: 100% 100%;
-  animation: none;
-  opacity: 1;
-  border-radius: 2px 2px 0 0;
-}
-
-.indicatorsLcars {
-  gap: var(--gap-md);
-}
-
-.indicatorLcars {
-  background: var(--bg-surface);
-  padding: 2px 12px;
-  border-radius: 20px;
-  font-size: 10px;
-  letter-spacing: 1px;
-}
-
-.dotLcars {
-  animation: none;
-}
-
-.dotLcars::after,
-.dotLcars::before {
   display: none;
 }
 
-.hudTagLcars {
-  color: var(--neon-orange);
-  opacity: 0.8;
-  animation: none;
+/* ── Segmented bar layout ── */
+.lcarsStatusSegments {
+  display: flex;
+  align-items: stretch;
+  gap: 3px;
+  width: 100%;
+  background: #000000;
+}
+
+.lcarsStatusSeg {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+}
+
+.lcarsStatusSyncText {
+  color: #000000;
+  font-family: var(--font-display);
+  font-size: 11px;
   font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  white-space: nowrap;
+  padding: 0 8px;
 }
 
-.hudTagAltLcars {
-  color: var(--neon-purple);
-  opacity: 0.8;
-  animation: none;
+.lcarsStatusTagSeg {
+  display: flex;
+  align-items: center;
+  padding: 0 14px;
+  flex: 0 0 auto;
+}
+
+.lcarsStatusTagText {
+  color: #000000;
+  font-family: var(--font-display);
+  font-size: 13px;
   font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  white-space: nowrap;
 }
 
-.dataTickerInnerLcars {
-  color: rgba(255, 153, 51, 0.4);
+/* ── Service indicators as pill badges ── */
+.lcarsStatusIndicators {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  padding: 0 4px;
+  background: #000000;
 }
 
-.settingsBtnLcars {
-  border: none;
-  background: var(--neon-purple);
-  color: var(--bg-deepest);
+.lcarsStatusPill {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 12px;
   border-radius: 20px;
-  padding: 3px 10px;
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #000000;
+}
+
+.lcarsStatusPillConnected {
+  background: #33cc99;
+}
+
+.lcarsStatusPillDisconnected {
+  background: #666666;
+}
+
+.lcarsStatusPillDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #000000;
+}
+
+/* ── Ticker inside fill segment ── */
+.lcarsStatusFillSeg {
+  display: flex;
+  align-items: center;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.lcarsTickerMask {
+  overflow: hidden;
+  flex: 1;
+  mask-image: linear-gradient(90deg, transparent 0%, black 10%, black 90%, transparent 100%);
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, black 10%, black 90%, transparent 100%);
+}
+
+.lcarsTickerInner {
+  display: flex;
+  white-space: nowrap;
+  animation: marquee-scroll 20s linear infinite;
+  color: #000000;
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.lcarsTickerInner span {
+  padding-right: 24px;
+}
+
+/* ── Settings button — pill-shaped ── */
+.settingsBtnLcars {
+  flex: 0 0 auto;
+  background: #9966cc;
+  border: none;
+  color: #000000;
+  cursor: pointer;
+  padding: 0 14px;
+  display: flex;
+  align-items: center;
+  font-weight: 700;
 }
 
 .settingsBtnLcars:hover {
-  background: var(--neon-cyan);
-  color: var(--bg-deepest);
-  border-color: transparent;
-  box-shadow: none;
+  background: #9999ff;
+}
+
+/* ── Curved elbow on right ── */
+.lcarsStatusElbow {
+  flex: 0 0 80px;
+  background: #ff9933;
+  border-radius: 40px 0 0 0;
 }

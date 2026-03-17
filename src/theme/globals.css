@@ -121,11 +121,12 @@ a:hover {
    LCARS Layout Overrides
    Clean, solid Federation-grade interface — no glitch, no glow,
    no scanlines, no particles, no animated grid.
+   Pure flat solids on black. The black IS the design.
    ═══════════════════════════════════════════════════════════════════ */
 
-/* Solid dark background — no gradient mesh */
+/* Pure black background — no gradient mesh, no effects */
 [data-layout="lcars"] body {
-  background: var(--bg-deepest);
+  background: #000000;
 }
 
 /* No animated grid background */
@@ -138,24 +139,28 @@ a:hover {
   display: none;
 }
 
-/* No viewport border glow animation */
+/* No viewport border glow — clean black edge */
 [data-layout="lcars"] #root {
   animation: none;
-  border: 1px solid rgba(153, 153, 255, 0.08);
+  border: none;
 }
 
-/* Clean scrollbars in LCARS colors */
+/* Wider scrollbars, solid orange thumb, black track, rounded */
+[data-layout="lcars"] ::-webkit-scrollbar {
+  width: 10px;
+}
+
 [data-layout="lcars"] ::-webkit-scrollbar-thumb {
-  background: rgba(255, 153, 51, 0.25);
-  border-radius: 3px;
+  background: #ff9933;
+  border-radius: 5px;
 }
 
 [data-layout="lcars"] ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 153, 51, 0.4);
+  background: #ffaa55;
 }
 
 [data-layout="lcars"] ::-webkit-scrollbar-track {
-  background: var(--bg-deep);
+  background: #000000;
 }
 
 /* Selection in LCARS orange */
@@ -166,15 +171,15 @@ a:hover {
 
 /* Links in LCARS blue */
 [data-layout="lcars"] a {
-  color: var(--neon-cyan);
+  color: #9999ff;
 }
 
 [data-layout="lcars"] a:hover {
   text-shadow: none;
-  color: var(--neon-orange);
+  color: #ff9933;
 }
 
 /* Focus in LCARS orange */
 [data-layout="lcars"] :focus-visible {
-  outline: 1px solid var(--neon-orange);
+  outline: 2px solid #ff9933;
 }

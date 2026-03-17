@@ -83,8 +83,14 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   LCARS Layout Variant — clean gaps, no glowing crosshair lines
+   LCARS Layout Variant — black gaps between panels, no glow lines
    ═══════════════════════════════════════════════════════════════════ */
+
+.gridLcars {
+  gap: 8px;
+  padding: 8px;
+  background: #000000;
+}
 
 .gridLcars::before {
   display: none;

@@ -90,19 +90,33 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   LCARS Layout Variant
+   LCARS Layout Variant — Flat cards with a thin colored top bar.
+   NO glow, NO scan effect, NO shadows. Clean & solid.
    ═══════════════════════════════════════════════════════════════════ */
 
 .cardLcars {
   border: none;
-  border-left: 4px solid var(--neon-orange);
-  border-radius: 2px 4px 4px 2px;
+  border-radius: 4px;
   box-shadow: none;
+  background: rgba(14, 14, 26, 0.9);
+  padding-top: calc(var(--gap-md) + 6px);
+  position: relative;
 }
 
-/* No diagonal scan on hover for LCARS */
+/* Thin colored top bar with pill-shaped ends */
 .cardLcars::before {
-  display: none;
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: #ff9933;
+  border-radius: 4px 4px 0 0;
+  transform: none;
+  animation: none;
+  opacity: 1;
+  pointer-events: none;
 }
 
 /* No click flash for LCARS */
@@ -112,18 +126,19 @@
 
 .cardLcars:hover {
   border-color: transparent;
-  border-left-color: var(--neon-cyan);
   box-shadow: none;
-  background: var(--bg-surface);
+  background: rgba(22, 22, 40, 0.95);
 }
 
-/* ── LCARS urgent: thicker red left border, no glow animation ── */
+/* ── LCARS urgent: red top bar, no glow animation ── */
 .urgentLcars {
-  border-left: 6px solid var(--neon-red);
   animation: none;
 }
 
+.urgentLcars::before {
+  background: #cc3333;
+}
+
 .urgentLcars:hover {
-  border-left-color: var(--neon-red);
   box-shadow: none;
 }
