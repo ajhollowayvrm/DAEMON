@@ -1,10 +1,10 @@
 [package]
-name = "neondash"
+name = "daemon"
 version = "0.1.0"
 edition = "2021"
 
 [lib]
-name = "neondash_lib"
+name = "daemon_lib"
 crate-type = ["lib", "cdylib", "staticlib"]
 
 [build-dependencies]

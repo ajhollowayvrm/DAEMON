@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Settings } from "lucide-react";
 import styles from "./StatusBar.module.css";
 
 interface ServiceStatus {
@@ -35,7 +36,7 @@ function formatTime(date: Date): string {
   });
 }
 
-export function StatusBar() {
+export function StatusBar({ onOpenSettings }: { onOpenSettings: () => void }) {
   const time = useClockTime();
 
   return (
@@ -76,6 +77,9 @@ export function StatusBar() {
         <span className={styles.hudTagAlt}>UPLINK_OK</span>
         <span className={styles.timestamp}>{time}</span>
         <span className={styles.syncTime}>Synced: 5s ago</span>
+        <button className={styles.settingsBtn} onClick={onOpenSettings}>
+          <Settings size={14} />
+        </button>
       </div>
     </div>
   );

@@ -41,31 +41,14 @@
   overflow-y: auto;
 }
 
-.bootLogo {
-  font-family: var(--font-display);
-  font-size: 32px;
-  font-weight: 700;
-  letter-spacing: 10px;
-  text-transform: uppercase;
-  background: linear-gradient(90deg, var(--neon-cyan), var(--neon-magenta));
-  background-size: 200% auto;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  animation: gradient-shift 3s ease infinite;
-  filter: drop-shadow(0 0 12px rgba(0, 255, 245, 0.5))
-    drop-shadow(0 0 30px rgba(255, 44, 241, 0.3));
-  align-self: center;
-}
-
-.bootSubtitle {
-  font-family: var(--font-mono);
-  font-size: 9px;
-  letter-spacing: 3px;
-  text-transform: uppercase;
-  color: var(--text-muted);
+.bootLogoImg {
+  height: 60px;
+  width: auto;
+  object-fit: contain;
   align-self: center;
   margin-bottom: 16px;
+  filter: drop-shadow(0 0 12px rgba(176, 38, 255, 0.5))
+    drop-shadow(0 0 30px rgba(0, 255, 245, 0.3));
 }
 
 .bootLines {

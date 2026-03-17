@@ -2,7 +2,9 @@ mod commands;
 mod models;
 mod services;
 
-use commands::{agent, gitlab, linear, slack};
+use commands::{agent, gitlab, linear, settings, slack};
+use tauri::menu::{MenuBuilder, MenuItemBuilder, SubmenuBuilder};
+use tauri::Emitter;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -25,6 +27,42 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_notification::init())
+        .setup(|app| {
+            let settings_item = MenuItemBuilder::with_id("settings", "Settings...")
+                .accelerator("CmdOrCtrl+,")
+                .build(app)?;
+
+            let app_submenu = SubmenuBuilder::new(app, "D.A.E.M.O.N.")
+                .item(&settings_item)
+                .separator()
+                .quit()
+                .build()?;
+
+            let edit_submenu = SubmenuBuilder::new(app, "Edit")
+                .undo()
+                .redo()
+                .separator()
+                .cut()
+                .copy()
+                .paste()
+                .select_all()
+                .build()?;
+
+            let menu = MenuBuilder::new(app)
+                .item(&app_submenu)
+                .item(&edit_submenu)
+                .build()?;
+
+            app.set_menu(menu)?;
+
+            app.on_menu_event(move |app_handle, event| {
+                if event.id() == "settings" {
+                    let _ = app_handle.emit("open-settings", ());
+                }
+            });
+
+            Ok(())
+        })
         .invoke_handler(tauri::generate_handler![
             slack::get_mentions,
             slack::get_slack_sections,
@@ -40,6 +78,10 @@ pub fn run() {
             linear::get_issue_detail,
             linear::add_linear_comment,
             agent::run_agent_command,
+            settings::get_settings,
+            settings::save_setting,
+            settings::test_gitlab_connection,
+            settings::test_linear_connection,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

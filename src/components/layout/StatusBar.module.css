@@ -134,6 +134,24 @@
   color: var(--text-secondary);
 }
 
+.settingsBtn {
+  background: transparent;
+  border: 1px solid rgba(0, 255, 245, 0.15);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 3px 6px;
+  display: flex;
+  align-items: center;
+  transition: all 0.2s;
+}
+
+.settingsBtn:hover {
+  color: var(--neon-cyan);
+  border-color: rgba(0, 255, 245, 0.4);
+  box-shadow: 0 0 8px rgba(0, 255, 245, 0.15);
+}
+
 /* ── Data ticker marquee ── */
 .dataTicker {
   overflow: hidden;

@@ -1,70 +1,87 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import styles from "./BootSequence.module.css";
 
 const BOOT_LINES = [
-  { text: "BIOS v4.20.69 — NectarCorp Unified Firmware", delay: 0 },
-  { text: "CPU: AMD Ryzen 9 9950X @ 5.7GHz ............ OK", delay: 100 },
-  { text: "RAM: 128GB DDR5-6400 ECC .................... OK", delay: 180 },
-  { text: "GPU: NVIDIA RTX 5090 Ti (48GB VRAM) ......... OK", delay: 260 },
-  { text: "NEURAL_LINK: Arasaka Mk.IV Interface ........ CONNECTED", delay: 340 },
-  { text: "", delay: 400 },
-  { text: "Loading D.A.E.M.O.N. kernel v0.1.0...", delay: 420 },
-  { text: "  [████████████████████████████████████] 100%", delay: 500 },
-  { text: "", delay: 550 },
-  { text: "Mounting /dev/sda1 on /mnt/corporate-overlord ....... OK", delay: 580 },
-  { text: "Initializing quantum entanglement resolver .......... OK", delay: 660 },
-  { text: "Loading todo_list.txt (WARNING: 847 items found) .... OK", delay: 740 },
-  { text: "Checking if it works on my machine .................. YES", delay: 820 },
-  { text: "Resolving node_modules (429,817 packages) ........... OK", delay: 900 },
-  { text: "Compiling 441 Rust crates ........................... OK", delay: 980 },
-  { text: "rm -rf node_modules && npm install .................. SKIPPED", delay: 1040 },
-  { text: "Verifying left-pad is not deprecated ................ UNCERTAIN", delay: 1100 },
-  { text: "", delay: 1140 },
-  { text: "Establishing secure uplinks:", delay: 1160 },
-  { text: "  ├─ Slack    ⟶ nectar-hr.slack.com ................ LINKED", delay: 1220 },
-  { text: "  ├─ GitLab   ⟶ gitlab.com/nectarhr ............... LINKED", delay: 1300 },
-  { text: "  ├─ Linear   ⟶ linear.app/nectar ................. LINKED", delay: 1380 },
-  { text: "  └─ Claude   ⟶ /usr/local/bin/claude ............. STANDBY", delay: 1460 },
-  { text: "", delay: 1500 },
-  { text: "Deploying countermeasures against:", delay: 1520 },
-  { text: "  ├─ Unnecessary meetings .......................... BLOCKED", delay: 1580 },
-  { text: "  ├─ Scope creep .................................. DETECTED (ironic)", delay: 1640 },
-  { text: "  ├─ \"Quick question\" DMs .......................... QUEUED", delay: 1700 },
-  { text: "  └─ Production incidents on Friday at 4:59pm ...... INEVITABLE", delay: 1760 },
-  { text: "", delay: 1800 },
-  { text: "Calibrating engineer caffeine-to-productivity ratio.. 1:0.03", delay: 1840 },
-  { text: "Disabling imposter syndrome module .................. FAILED (as expected)", delay: 1920 },
-  { text: "Running final diagnostics ........................... ALL GREEN", delay: 2000 },
-  { text: "", delay: 2050 },
-  { text: "╔══════════════════════════════════════════════════════╗", delay: 2100 },
-  { text: "║  D.A.E.M.O.N. ONLINE — ALL SYSTEMS OPERATIONAL     ║", delay: 2150 },
-  { text: "║  \"It's not a bug, it's a feature.\"                  ║", delay: 2200 },
-  { text: "╚══════════════════════════════════════════════════════╝", delay: 2250 },
+  "BIOS v4.20.69 — NectarCorp Unified Firmware",
+  "CPU: AMD Ryzen 9 9950X @ 5.7GHz ............ OK",
+  "RAM: 128GB DDR5-6400 ECC .................... OK",
+  "GPU: NVIDIA RTX 5090 Ti (48GB VRAM) ......... OK",
+  "NEURAL_LINK: Arasaka Mk.IV Interface ........ CONNECTED",
+  "",
+  "Loading D.A.E.M.O.N. kernel v0.1.0...",
+  "  [████████████████████████████████████] 100%",
+  "",
+  "Mounting /dev/sda1 on /mnt/corporate-overlord ....... OK",
+  "Initializing quantum entanglement resolver .......... OK",
+  "Loading todo_list.txt (WARNING: 847 items found) .... OK",
+  "Checking if it works on my machine .................. YES",
+  "Resolving node_modules (429,817 packages) ........... OK",
+  "Compiling 441 Rust crates ........................... OK",
+  "rm -rf node_modules && npm install .................. SKIPPED",
+  "Verifying left-pad is not deprecated ................ UNCERTAIN",
+  "",
+  "Establishing secure uplinks:",
+  "  ├─ Slack    ⟶ nectar-hr.slack.com ................ LINKED",
+  "  ├─ GitLab   ⟶ gitlab.com/nectarhr ............... LINKED",
+  "  ├─ Linear   ⟶ linear.app/nectar ................. LINKED",
+  "  └─ Claude   ⟶ /usr/local/bin/claude ............. STANDBY",
+  "",
+  "Deploying countermeasures against:",
+  "  ├─ Unnecessary meetings .......................... BLOCKED",
+  "  ├─ Scope creep .................................. DETECTED (ironic)",
+  "  ├─ \"Quick question\" DMs .......................... QUEUED",
+  "  └─ Production incidents on Friday at 4:59pm ...... INEVITABLE",
+  "",
+  "Calibrating engineer caffeine-to-productivity ratio.. 1:0.03",
+  "Disabling imposter syndrome module .................. FAILED (as expected)",
+  "Running final diagnostics ........................... ALL GREEN",
+  "",
+  "╔══════════════════════════════════════════════════════╗",
+  "║  D.A.E.M.O.N. ONLINE — ALL SYSTEMS OPERATIONAL     ║",
+  "║  \"It's not a bug, it's a feature.\"                  ║",
+  "╚══════════════════════════════════════════════════════╝",
 ];
 
-const TOTAL_BOOT_TIME = 3200;
 const FADE_DURATION = 600;
 
+function getBootSettings() {
+  const enabled = localStorage.getItem("daemon_boot_enabled") !== "false";
+  const duration = parseInt(localStorage.getItem("daemon_boot_duration") ?? "5", 10);
+  return { enabled, duration };
+}
+
 export function BootSequence() {
-  const [visible, setVisible] = useState(true);
+  const { enabled, duration } = useMemo(getBootSettings, []);
+
+  const [visible, setVisible] = useState(enabled);
   const [fading, setFading] = useState(false);
   const [visibleLines, setVisibleLines] = useState(0);
 
+  // Calculate timing: lines take ~70% of duration, hold at end takes ~30%
+  const lineTime = (duration * 1000) * 0.7;
+  const holdTime = (duration * 1000) * 0.3;
+  const delayPerLine = lineTime / BOOT_LINES.length;
+
   useEffect(() => {
-    const timers = BOOT_LINES.map((line, idx) =>
-      setTimeout(() => setVisibleLines(idx + 1), line.delay),
+    if (!enabled) return;
+
+    const timers = BOOT_LINES.map((_, idx) =>
+      setTimeout(() => setVisibleLines(idx + 1), idx * delayPerLine),
     );
-    const fadeTimer = setTimeout(() => setFading(true), TOTAL_BOOT_TIME);
+
+    const totalLineTime = BOOT_LINES.length * delayPerLine;
+    const fadeTimer = setTimeout(() => setFading(true), totalLineTime + holdTime);
     const removeTimer = setTimeout(
       () => setVisible(false),
-      TOTAL_BOOT_TIME + FADE_DURATION,
+      totalLineTime + holdTime + FADE_DURATION,
     );
+
     return () => {
       timers.forEach(clearTimeout);
       clearTimeout(fadeTimer);
       clearTimeout(removeTimer);
     };
-  }, []);
+  }, [enabled, delayPerLine, holdTime]);
 
   if (!visible) return null;
 
@@ -78,21 +95,28 @@ export function BootSequence() {
       }
     >
       <div className={styles.bootContent}>
-        <div className={styles.bootLogo}>D.A.E.M.O.N.</div>
-        <div className={styles.bootSubtitle}>
-          Distributed Autonomous Engineering Management Orchestration Node
-        </div>
+        <img
+          src="/assets/daemon-logo.png"
+          alt="D.A.E.M.O.N."
+          className={styles.bootLogoImg}
+        />
         <div className={styles.bootLines}>
-          {BOOT_LINES.slice(0, visibleLines).map((line, idx) => (
+          {BOOT_LINES.slice(0, visibleLines).map((text, idx) => (
             <div
               key={idx}
               className={`${styles.bootLine} ${
-                line.text.includes("ONLINE") ? styles.bootLineReady : ""
-              } ${line.text.includes("FAILED") || line.text.includes("INEVITABLE") || line.text.includes("UNCERTAIN") ? styles.bootLineWarn : ""} ${
-                line.text.includes("LINKED") || line.text.includes("OK") || line.text.includes("ALL GREEN") ? styles.bootLineOk : ""
-              } ${line.text === "" ? styles.bootLineSpacer : ""}`}
+                text.includes("ONLINE") ? styles.bootLineReady : ""
+              } ${
+                text.includes("FAILED") || text.includes("INEVITABLE") || text.includes("UNCERTAIN")
+                  ? styles.bootLineWarn
+                  : ""
+              } ${
+                text.includes("LINKED") || text.includes("OK") || text.includes("ALL GREEN")
+                  ? styles.bootLineOk
+                  : ""
+              } ${text === "" ? styles.bootLineSpacer : ""}`}
             >
-              {line.text}
+              {text}
             </div>
           ))}
           {visibleLines < BOOT_LINES.length && (

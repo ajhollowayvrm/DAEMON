@@ -1,0 +1,55 @@
+.slot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(10, 10, 15, 0.5);
+  border: 1px dashed rgba(176, 38, 255, 0.1);
+  border-radius: var(--radius-md);
+  position: relative;
+  overflow: hidden;
+}
+
+.slot::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 20px,
+      rgba(176, 38, 255, 0.015) 20px,
+      rgba(176, 38, 255, 0.015) 21px
+    );
+  pointer-events: none;
+}
+
+.slotContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--gap-sm);
+  opacity: 0.3;
+}
+
+.slotIcon {
+  font-size: 24px;
+  color: var(--neon-purple);
+  filter: drop-shadow(0 0 4px rgba(176, 38, 255, 0.3));
+}
+
+.slotText {
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.slotHint {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-muted);
+  opacity: 0.6;
+}

@@ -1,0 +1,356 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: rgba(10, 10, 15, 0.85);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: settingsOverlayIn 0.2s ease-out;
+}
+
+@keyframes settingsOverlayIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modal {
+  background: var(--bg-base);
+  border: 1px solid rgba(0, 255, 245, 0.2);
+  border-radius: var(--radius-lg);
+  box-shadow:
+    0 0 2px rgba(0, 255, 245, 0.6),
+    0 0 20px rgba(0, 255, 245, 0.15),
+    0 0 60px rgba(176, 38, 255, 0.1),
+    0 20px 60px rgba(0, 0, 0, 0.5);
+  width: 560px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  animation: settingsModalIn 0.3s ease-out;
+  overflow: hidden;
+}
+
+@keyframes settingsModalIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-sm);
+  padding: var(--gap-lg);
+  border-bottom: 1px solid rgba(0, 255, 245, 0.1);
+  background: linear-gradient(180deg, rgba(176, 38, 255, 0.06) 0%, transparent 100%);
+}
+
+.headerIcon {
+  color: var(--neon-cyan);
+  filter: drop-shadow(0 0 4px rgba(0, 255, 245, 0.4));
+}
+
+.modalTitle {
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--text-primary);
+  flex: 1;
+}
+
+.closeBtn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  transition: color 0.2s;
+}
+
+.closeBtn:hover {
+  color: var(--neon-red);
+}
+
+.modalContent {
+  padding: var(--gap-lg);
+  overflow-y: auto;
+  flex: 1;
+}
+
+.sectionTitle {
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--neon-cyan);
+  margin-bottom: var(--gap-xs);
+}
+
+.sectionDesc {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-bottom: var(--gap-lg);
+}
+
+/* ── Credential rows ── */
+
+.credRow {
+  background: var(--bg-raised);
+  border: 1px solid rgba(176, 38, 255, 0.08);
+  border-radius: var(--radius-sm);
+  padding: var(--gap-md);
+  margin-bottom: var(--gap-sm);
+}
+
+.credHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--gap-sm);
+}
+
+.credLabel {
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.credStatus {
+  font-family: var(--font-mono);
+  font-size: 10px;
+}
+
+.credConfigured {
+  color: var(--neon-green);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.credMissing {
+  color: var(--neon-orange);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.credActions {
+  display: flex;
+  gap: var(--gap-sm);
+}
+
+.credEdit {
+  display: flex;
+  gap: var(--gap-sm);
+  align-items: center;
+}
+
+.credInput {
+  flex: 1;
+  background: var(--bg-deep);
+  border: 1px solid rgba(176, 38, 255, 0.2);
+  border-radius: var(--radius-sm);
+  padding: 6px 10px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-primary);
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.credInput::placeholder {
+  color: var(--text-muted);
+}
+
+.credInput:focus {
+  border-color: var(--neon-cyan);
+  box-shadow: 0 0 6px rgba(0, 255, 245, 0.1);
+}
+
+.cancelBtn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+}
+
+.cancelBtn:hover {
+  color: var(--neon-red);
+}
+
+.testSuccess {
+  margin-top: var(--gap-sm);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--neon-green);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.testError {
+  margin-top: var(--gap-sm);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--neon-red);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+@keyframes spinIcon {
+  to { transform: rotate(360deg); }
+}
+
+.spinIcon {
+  animation: spinIcon 1s linear infinite;
+}
+
+/* ── Slack info ── */
+
+.slackInfo {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: var(--gap-sm);
+  padding: var(--gap-md);
+  background: var(--bg-raised);
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(57, 255, 20, 0.1);
+}
+
+.slackCheck {
+  color: var(--neon-green);
+  flex-shrink: 0;
+}
+
+/* ── Toggle switch ── */
+
+.toggleBtn {
+  width: 36px;
+  height: 20px;
+  border-radius: 10px;
+  border: 1px solid rgba(176, 38, 255, 0.2);
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.toggleOn {
+  background: rgba(0, 255, 245, 0.15);
+  border-color: rgba(0, 255, 245, 0.4);
+}
+
+.toggleOff {
+  background: var(--bg-deep);
+}
+
+.toggleKnob {
+  position: absolute;
+  top: 2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  transition: all 0.2s;
+}
+
+.toggleOn .toggleKnob {
+  left: 18px;
+  background: var(--neon-cyan);
+  box-shadow: 0 0 6px rgba(0, 255, 245, 0.5);
+}
+
+.toggleOff .toggleKnob {
+  left: 2px;
+  background: var(--text-muted);
+}
+
+/* ── Slider ── */
+
+.sliderRow {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-md);
+  margin-top: var(--gap-sm);
+}
+
+.sliderLabel {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.slider {
+  flex: 1;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  background: var(--bg-deep);
+  border-radius: 2px;
+  outline: none;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--neon-cyan);
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 0 6px rgba(0, 255, 245, 0.5);
+  margin-top: -5px;
+}
+
+.slider::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--bg-deep);
+}
+
+.sliderValue {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--neon-cyan);
+  min-width: 28px;
+  text-align: right;
+}
+
+/* ── About ── */
+
+.aboutInfo {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-secondary);
+  padding: var(--gap-md);
+  background: var(--bg-raised);
+  border-radius: var(--radius-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.aboutSub {
+  font-size: 9px;
+  color: var(--text-muted);
+}
