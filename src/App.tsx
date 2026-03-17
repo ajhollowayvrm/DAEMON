@@ -37,6 +37,7 @@ const PANEL_COMPONENTS: Record<PanelId, React.ComponentType> = {
 
 function App() {
   const [showSettings, setShowSettings] = useState(false);
+  const [bootKey, setBootKey] = useState(0);
   const [openPanels, setOpenPanels] = useState<Set<PanelId>>(
     new Set(PANEL_ORDER),
   );
@@ -54,11 +55,15 @@ function App() {
   }, []);
 
   useEffect(() => {
-    const unlisten = listen("open-settings", () => {
+    const unlistenSettings = listen("open-settings", () => {
       setShowSettings(true);
     });
+    const unlistenBoot = listen("replay-boot", () => {
+      setBootKey((k) => k + 1);
+    });
     return () => {
-      unlisten.then((fn) => fn());
+      unlistenSettings.then((fn) => fn());
+      unlistenBoot.then((fn) => fn());
     };
   }, []);
 
@@ -87,7 +92,7 @@ function App() {
           <StatusBar onOpenSettings={() => setShowSettings(true)} />
           <ScanlineOverlay />
           <HudDecorations />
-          <BootSequence />
+          <BootSequence key={bootKey} forcePlay={bootKey > 0} />
           {showSettings && (
             <SettingsModal onClose={() => setShowSettings(false)} />
           )}

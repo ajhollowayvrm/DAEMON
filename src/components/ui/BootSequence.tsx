@@ -20,14 +20,15 @@ function getBootSettings() {
   return { enabled, duration };
 }
 
-export function BootSequence() {
+export function BootSequence({ forcePlay = false }: { forcePlay?: boolean }) {
   const { theme } = useTheme();
   const { enabled, duration } = useMemo(getBootSettings, []);
+  const shouldPlay = forcePlay || enabled;
   const bootLines = useMemo(
     () => getBootLines(theme.bootSequence.lines, duration),
     [theme.bootSequence.lines, duration],
   );
-  const [phase, setPhase] = useState<Phase>(enabled ? "text" : "done");
+  const [phase, setPhase] = useState<Phase>(shouldPlay ? "text" : "done");
   const [visibleLines, setVisibleLines] = useState(0);
   const logoRef = useRef<HTMLImageElement>(null);
 
@@ -37,7 +38,7 @@ export function BootSequence() {
   const delayPerLine = lineTime / bootLines.length;
 
   useEffect(() => {
-    if (!enabled) return;
+    if (!shouldPlay) return;
 
     // Phase 1: Show text lines
     const lineTimers = bootLines.map((_, idx) =>

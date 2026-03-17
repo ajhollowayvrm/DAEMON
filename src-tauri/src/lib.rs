@@ -32,8 +32,13 @@ pub fn run() {
                 .accelerator("CmdOrCtrl+,")
                 .build(app)?;
 
+            let replay_boot_item = MenuItemBuilder::with_id("replay-boot", "Replay Boot Sequence")
+                .accelerator("CmdOrCtrl+Shift+B")
+                .build(app)?;
+
             let app_submenu = SubmenuBuilder::new(app, "D.A.E.M.O.N.")
                 .item(&settings_item)
+                .item(&replay_boot_item)
                 .separator()
                 .quit()
                 .build()?;
@@ -58,6 +63,8 @@ pub fn run() {
             app.on_menu_event(move |app_handle, event| {
                 if event.id() == "settings" {
                     let _ = app_handle.emit("open-settings", ());
+                } else if event.id() == "replay-boot" {
+                    let _ = app_handle.emit("replay-boot", ());
                 }
             });
 
