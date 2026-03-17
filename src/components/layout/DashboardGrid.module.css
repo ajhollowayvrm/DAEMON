@@ -1,0 +1,83 @@
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: var(--gap-md);
+  padding: var(--gap-md);
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Pulsing glow line in the horizontal gap (center cross) ── */
+.grid::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: var(--gap-md);
+  right: var(--gap-md);
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(0, 255, 245, 0.12) 20%,
+    rgba(176, 38, 255, 0.18) 50%,
+    rgba(0, 255, 245, 0.12) 80%,
+    transparent 100%
+  );
+  pointer-events: none;
+  z-index: 0;
+  animation: cross-pulse 3s ease-in-out infinite;
+}
+
+/* ── Pulsing glow line in the vertical gap ── */
+.grid::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: var(--gap-md);
+  bottom: var(--gap-md);
+  width: 1px;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(0, 255, 245, 0.12) 20%,
+    rgba(176, 38, 255, 0.18) 50%,
+    rgba(0, 255, 245, 0.12) 80%,
+    transparent 100%
+  );
+  pointer-events: none;
+  z-index: 0;
+  animation: cross-pulse 3s ease-in-out infinite 1.5s;
+}
+
+/* ── Glowing intersection node ── */
+.intersectionNode {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 6px;
+  height: 6px;
+  margin-top: -3px;
+  margin-left: -3px;
+  border-radius: 50%;
+  background: var(--neon-cyan);
+  pointer-events: none;
+  z-index: 0;
+  animation: node-glow 3s ease-in-out infinite;
+}
+
+/* ── Secondary ring around the node ── */
+.intersectionNode::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 255, 245, 0.3);
+  animation: dot-ring-expand 2s ease-out infinite;
+  transform: translate(-50%, -50%);
+}

@@ -1,0 +1,17 @@
+.error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--gap-md);
+  padding: var(--gap-xl);
+  color: var(--neon-red);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  text-align: center;
+}
+
+.message {
+  color: var(--text-muted);
+  font-size: 11px;
+}

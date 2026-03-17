@@ -1,0 +1,90 @@
+.card {
+  background: var(--bg-raised);
+  border: 1px solid rgba(176, 38, 255, 0.12);
+  border-radius: var(--radius-sm);
+  padding: var(--gap-md);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease,
+    background 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ── Diagonal scan line on hover ── */
+.card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 40%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(0, 255, 245, 0.06),
+    rgba(0, 255, 245, 0.02),
+    transparent
+  );
+  transform: translateX(-100%) skewX(-15deg);
+  transition: none;
+  pointer-events: none;
+}
+
+.card:hover::before {
+  animation: diagonal-scan 0.8s ease-out;
+}
+
+/* ── Click flash overlay ── */
+.card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 255, 245, 0.08);
+  opacity: 0;
+  pointer-events: none;
+  border-radius: var(--radius-sm);
+}
+
+.card:hover {
+  border-color: rgba(0, 255, 245, 0.25);
+  box-shadow: 0 0 8px rgba(0, 255, 245, 0.1),
+    inset 0 0 8px rgba(0, 255, 245, 0.03);
+  background: rgba(26, 23, 48, 0.95);
+}
+
+.clickable {
+  cursor: pointer;
+}
+
+.clickable:active {
+  transform: scale(0.99);
+}
+
+.clickable:active::after {
+  animation: click-flash 0.3s ease-out;
+}
+
+/* ── Urgent variant with aggressive pulse ── */
+.urgent {
+  border-color: rgba(255, 44, 241, 0.3);
+  animation: glow-breathe-magenta 2s ease-in-out infinite;
+}
+
+.urgent:hover {
+  border-color: rgba(255, 44, 241, 0.5);
+  box-shadow: 0 0 10px rgba(255, 44, 241, 0.2),
+    0 0 20px rgba(255, 44, 241, 0.1),
+    inset 0 0 8px rgba(255, 44, 241, 0.05);
+}
+
+/* ── Urgent-specific pulsing glow ── */
+@keyframes glow-breathe-magenta {
+  0%, 100% {
+    box-shadow: 0 0 4px rgba(255, 44, 241, 0.2),
+      0 0 10px rgba(255, 44, 241, 0.1);
+  }
+  50% {
+    box-shadow: 0 0 8px rgba(255, 44, 241, 0.4),
+      0 0 20px rgba(255, 44, 241, 0.2),
+      0 0 35px rgba(255, 44, 241, 0.1);
+  }
+}

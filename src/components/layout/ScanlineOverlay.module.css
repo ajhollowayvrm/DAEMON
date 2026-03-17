@@ -1,0 +1,88 @@
+.scanlines {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.08) 2px,
+    rgba(0, 0, 0, 0.08) 4px
+  );
+  opacity: 0.6;
+}
+
+/* ── Moving scan band ── */
+.scanlines::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    transparent 50%,
+    rgba(0, 0, 0, 0.02) 50%
+  );
+  background-size: 100% 4px;
+  animation: scanline 8s linear infinite;
+  opacity: 0.3;
+}
+
+/* ── Occasional horizontal glitch bar ── */
+.scanlines::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(
+    90deg,
+    transparent 5%,
+    rgba(0, 255, 245, 0.08) 10%,
+    rgba(255, 44, 241, 0.06) 40%,
+    rgba(0, 255, 245, 0.08) 70%,
+    transparent 95%
+  );
+  --glitch-y: 30vh;
+  animation: glitch-bar 12s step-end infinite;
+  pointer-events: none;
+}
+
+/* ── Chromatic aberration on edges (very subtle) ── */
+.chromaticEdge {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9998;
+}
+
+/* ── Left edge — slight red/magenta shift ── */
+.chromaticEdge::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 40px;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 44, 241, 0.025),
+    transparent
+  );
+  pointer-events: none;
+}
+
+/* ── Right edge — slight cyan shift ── */
+.chromaticEdge::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 40px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(0, 255, 245, 0.025)
+  );
+  pointer-events: none;
+}

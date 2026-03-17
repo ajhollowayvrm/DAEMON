@@ -1,0 +1,166 @@
+/* ── HUD Decorations — overlay elements for cyberpunk atmosphere ── */
+
+.hudContainer {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 50;
+  overflow: hidden;
+}
+
+/* ── Corner bracket decorations ── */
+.cornerMark {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  opacity: 0.2;
+}
+
+.cornerMarkTL {
+  composes: cornerMark;
+  top: 56px; /* below title bar */
+  left: 8px;
+  border-top: 1px solid var(--neon-cyan);
+  border-left: 1px solid var(--neon-cyan);
+}
+
+.cornerMarkTR {
+  composes: cornerMark;
+  top: 56px;
+  right: 8px;
+  border-top: 1px solid var(--neon-cyan);
+  border-right: 1px solid var(--neon-cyan);
+}
+
+.cornerMarkBL {
+  composes: cornerMark;
+  bottom: 42px; /* above status bar */
+  left: 8px;
+  border-bottom: 1px solid var(--neon-cyan);
+  border-left: 1px solid var(--neon-cyan);
+}
+
+.cornerMarkBR {
+  composes: cornerMark;
+  bottom: 42px;
+  right: 8px;
+  border-bottom: 1px solid var(--neon-cyan);
+  border-right: 1px solid var(--neon-cyan);
+}
+
+/* ── Small data readout text ── */
+.dataReadout {
+  position: absolute;
+  font-family: var(--font-mono);
+  font-size: 8px;
+  letter-spacing: 1px;
+  color: rgba(0, 255, 245, 0.18);
+  text-transform: uppercase;
+  white-space: nowrap;
+  animation: flicker 10s ease-in-out infinite;
+}
+
+.dataReadoutTL {
+  composes: dataReadout;
+  top: 60px;
+  left: 32px;
+}
+
+.dataReadoutTR {
+  composes: dataReadout;
+  top: 60px;
+  right: 32px;
+  text-align: right;
+  animation-delay: 2s;
+}
+
+.dataReadoutBL {
+  composes: dataReadout;
+  bottom: 46px;
+  left: 32px;
+  animation-delay: 4s;
+}
+
+.dataReadoutBR {
+  composes: dataReadout;
+  bottom: 46px;
+  right: 32px;
+  text-align: right;
+  animation-delay: 6s;
+}
+
+/* ── Thin decorative horizontal lines with dots ── */
+.decorLine {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  opacity: 0.12;
+}
+
+.decorLineTop {
+  composes: decorLine;
+  top: 78px;
+  left: 8px;
+  right: 8px;
+}
+
+.decorLineBottom {
+  composes: decorLine;
+  bottom: 62px;
+  left: 8px;
+  right: 8px;
+}
+
+.lineDot {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--neon-cyan);
+  flex-shrink: 0;
+}
+
+.lineBar {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    var(--neon-cyan),
+    rgba(176, 38, 255, 0.5),
+    var(--neon-cyan)
+  );
+  opacity: 0.5;
+}
+
+/* ── Data stream columns (Matrix-style rain) ── */
+.streamColumn {
+  position: absolute;
+  top: 0;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  line-height: 1.4;
+  color: var(--neon-cyan);
+  white-space: pre;
+  writing-mode: vertical-lr;
+  text-orientation: mixed;
+  letter-spacing: 2px;
+  animation: matrix-rain linear infinite;
+  will-change: transform;
+  pointer-events: none;
+  z-index: -1;
+  filter: blur(0.3px);
+}
+
+/* ── Floating particles ── */
+.particle {
+  position: absolute;
+  border-radius: 50%;
+  animation: particle-drift-1 linear infinite;
+  will-change: transform, opacity;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.particle:nth-child(odd) {
+  animation-name: particle-drift-2;
+}

@@ -1,0 +1,44 @@
+.button {
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 6px 16px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--neon-cyan);
+  background: transparent;
+  color: var(--neon-cyan);
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.button:hover {
+  background: var(--neon-cyan-dim);
+  box-shadow: var(--glow-cyan);
+}
+
+.button:active {
+  transform: scale(0.97);
+}
+
+.magenta {
+  border-color: var(--neon-magenta);
+  color: var(--neon-magenta);
+}
+
+.magenta:hover {
+  background: var(--neon-magenta-dim);
+  box-shadow: var(--glow-magenta);
+}
+
+.purple {
+  border-color: var(--neon-purple);
+  color: var(--neon-purple);
+}
+
+.purple:hover {
+  background: var(--neon-purple-dim);
+  box-shadow: var(--glow-purple);
+}

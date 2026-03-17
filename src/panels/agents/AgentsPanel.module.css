@@ -1,0 +1,413 @@
+/* ── Research box ── */
+
+.researchBox {
+  background: var(--bg-raised);
+  border: 1px solid rgba(255, 230, 0, 0.12);
+  border-radius: var(--radius-sm);
+  padding: var(--gap-md);
+  margin-bottom: var(--gap-md);
+}
+
+.researchHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-xs);
+  margin-bottom: var(--gap-sm);
+}
+
+.researchIcon {
+  color: var(--neon-yellow);
+}
+
+.researchLabel {
+  font-family: var(--font-display);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--neon-yellow);
+}
+
+.researchInput {
+  display: flex;
+  gap: var(--gap-sm);
+  align-items: flex-end;
+}
+
+.queryInput {
+  flex: 1;
+  background: var(--bg-deep);
+  border: 1px solid rgba(176, 38, 255, 0.2);
+  border-radius: var(--radius-sm);
+  padding: var(--gap-sm) var(--gap-md);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-primary);
+  outline: none;
+  resize: none;
+  line-height: 1.4;
+  transition: border-color 0.2s;
+}
+
+.queryInput::placeholder {
+  color: var(--text-muted);
+}
+
+.queryInput:focus {
+  border-color: var(--neon-yellow);
+  box-shadow: 0 0 8px rgba(255, 230, 0, 0.1);
+}
+
+/* ── Recent tasks ── */
+
+.recentTasks {
+  margin-bottom: var(--gap-md);
+}
+
+.recentTitle {
+  font-family: var(--font-display);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: var(--gap-xs);
+  padding: 0 var(--gap-sm);
+}
+
+.recentTask {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-sm);
+  width: 100%;
+  padding: 4px var(--gap-sm);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  border-radius: var(--radius-sm);
+  transition: background 0.15s;
+}
+
+.recentTask:hover {
+  background: var(--bg-raised);
+}
+
+.taskDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.taskRunning {
+  background: var(--neon-cyan);
+  box-shadow: 0 0 6px rgba(0, 255, 245, 0.6);
+  animation: neon-pulse 1s ease-in-out infinite;
+}
+
+.taskDone {
+  background: var(--neon-green);
+}
+
+.taskLabel {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── Teams list ── */
+
+.teamsList {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.teamSection {
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.teamHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-sm);
+  width: 100%;
+  padding: var(--gap-sm) var(--gap-md);
+  background: var(--bg-raised);
+  border: none;
+  cursor: pointer;
+  transition: background 0.15s;
+  text-align: left;
+}
+
+.teamHeader:hover {
+  background: var(--bg-hover);
+}
+
+.teamChevron {
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.teamName {
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  flex: 1;
+}
+
+.commandCount {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-muted);
+}
+
+/* ── Command list ── */
+
+.commandList {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-base);
+}
+
+.commandItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px var(--gap-md) 6px calc(var(--gap-md) + 20px);
+  background: transparent;
+  border: none;
+  border-top: 1px solid rgba(176, 38, 255, 0.05);
+  cursor: pointer;
+  transition: background 0.15s;
+  text-align: left;
+  width: 100%;
+}
+
+.commandItem:hover {
+  background: var(--bg-raised);
+}
+
+.commandInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.commandName {
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.commandSlash {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-muted);
+}
+
+.playIcon {
+  color: var(--text-muted);
+  transition: color 0.15s;
+  flex-shrink: 0;
+}
+
+.commandItem:hover .playIcon {
+  color: var(--neon-green);
+}
+
+/* ── Command runner expanded ── */
+
+.commandRunnerExpanded {
+  padding: var(--gap-sm) var(--gap-md) var(--gap-sm) calc(var(--gap-md) + 20px);
+  background: var(--bg-raised);
+  border-top: 1px solid rgba(176, 38, 255, 0.05);
+}
+
+.commandRunnerHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--gap-xs);
+}
+
+.closeBtn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+}
+
+.closeBtn:hover {
+  color: var(--neon-red);
+}
+
+.commandRunnerInput {
+  display: flex;
+  gap: var(--gap-sm);
+}
+
+.argInput {
+  flex: 1;
+  background: var(--bg-deep);
+  border: 1px solid rgba(176, 38, 255, 0.2);
+  border-radius: var(--radius-sm);
+  padding: 5px 10px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-primary);
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.argInput::placeholder {
+  color: var(--text-muted);
+}
+
+.argInput:focus {
+  border-color: var(--neon-magenta);
+  box-shadow: 0 0 6px rgba(255, 44, 241, 0.1);
+}
+
+/* ── Output view ── */
+
+.outputView {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  margin: calc(-1 * var(--gap-md));
+}
+
+.outputToolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-sm);
+  padding: var(--gap-sm) var(--gap-md);
+  background: var(--bg-deep);
+  border-bottom: 1px solid rgba(0, 255, 245, 0.1);
+  flex-shrink: 0;
+}
+
+.backBtn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: transparent;
+  border: 1px solid rgba(0, 255, 245, 0.25);
+  border-radius: var(--radius-sm);
+  padding: 3px 10px;
+  font-family: var(--font-display);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--neon-cyan);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.backBtn:hover {
+  background: var(--neon-cyan-dim);
+  box-shadow: 0 0 8px rgba(0, 255, 245, 0.15);
+}
+
+.outputCommand {
+  flex: 1;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.runningDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--neon-cyan);
+  box-shadow: 0 0 8px rgba(0, 255, 245, 0.6);
+  animation: neon-pulse 1s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+.outputContent {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--gap-md);
+}
+
+.outputMarkdown {
+  font-family: var(--font-body);
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+.outputMarkdown h1,
+.outputMarkdown h2,
+.outputMarkdown h3 {
+  font-family: var(--font-display);
+  color: var(--text-primary);
+  margin: var(--gap-lg) 0 var(--gap-sm);
+  letter-spacing: 0.5px;
+}
+
+.outputMarkdown h1 { font-size: 15px; }
+.outputMarkdown h2 { font-size: 13px; }
+.outputMarkdown h3 { font-size: 12px; }
+
+.outputMarkdown p {
+  margin: var(--gap-sm) 0;
+}
+
+.outputMarkdown code {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  background: var(--bg-deep);
+  padding: 1px 5px;
+  border-radius: 3px;
+  color: var(--neon-cyan);
+}
+
+.outputMarkdown pre {
+  background: var(--bg-deep);
+  border: 1px solid rgba(176, 38, 255, 0.1);
+  border-radius: var(--radius-sm);
+  padding: var(--gap-md);
+  overflow-x: auto;
+  margin: var(--gap-sm) 0;
+}
+
+.outputMarkdown pre code {
+  background: none;
+  padding: 0;
+  color: var(--text-secondary);
+}
+
+.outputMarkdown ul,
+.outputMarkdown ol {
+  padding-left: var(--gap-lg);
+  margin: var(--gap-sm) 0;
+}
+
+.outputMarkdown strong {
+  color: var(--text-primary);
+}
+
+.outputMarkdown a {
+  color: var(--neon-cyan);
+}

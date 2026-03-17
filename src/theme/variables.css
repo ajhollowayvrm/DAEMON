@@ -1,0 +1,72 @@
+/* ── Register custom property for border-trace animation ── */
+@property --border-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+:root {
+  /* ── Background palette ── */
+  --bg-deepest: #0a0a0f;
+  --bg-deep: #0e0c1a;
+  --bg-base: #12101f;
+  --bg-raised: #1a1730;
+  --bg-surface: #221e3a;
+  --bg-hover: #2a2545;
+
+  /* ── Neon accent colors ── */
+  --neon-magenta: #ff2cf1;
+  --neon-cyan: #00fff5;
+  --neon-purple: #b026ff;
+  --neon-green: #39ff14;
+  --neon-orange: #ff6b2b;
+  --neon-yellow: #ffe600;
+  --neon-red: #ff1744;
+
+  /* ── Dimmed accents (for backgrounds, borders) ── */
+  --neon-magenta-dim: rgba(255, 44, 241, 0.15);
+  --neon-cyan-dim: rgba(0, 255, 245, 0.12);
+  --neon-purple-dim: rgba(176, 38, 255, 0.15);
+  --neon-green-dim: rgba(57, 255, 20, 0.12);
+
+  /* ── Text colors ── */
+  --text-primary: #e8e0ff;
+  --text-secondary: #a89cc8;
+  --text-muted: #6b5f8a;
+  --text-bright: #ffffff;
+
+  /* ── Glow shadows ── */
+  --glow-magenta: 0 0 5px rgba(255, 44, 241, 0.4),
+    0 0 20px rgba(255, 44, 241, 0.2), 0 0 40px rgba(255, 44, 241, 0.1);
+  --glow-cyan: 0 0 5px rgba(0, 255, 245, 0.4), 0 0 20px rgba(0, 255, 245, 0.2),
+    0 0 40px rgba(0, 255, 245, 0.1);
+  --glow-purple: 0 0 5px rgba(176, 38, 255, 0.4),
+    0 0 20px rgba(176, 38, 255, 0.2), 0 0 40px rgba(176, 38, 255, 0.1);
+  --glow-green: 0 0 5px rgba(57, 255, 20, 0.4), 0 0 20px rgba(57, 255, 20, 0.2),
+    0 0 40px rgba(57, 255, 20, 0.1);
+
+  /* ── Panel border glow (multi-layer) ── */
+  --panel-glow: 0 0 1px rgba(0, 255, 245, 0.6), 0 0 4px rgba(0, 255, 245, 0.3),
+    0 0 12px rgba(0, 255, 245, 0.15), inset 0 0 8px rgba(0, 255, 245, 0.05);
+
+  /* ── Typography ── */
+  --font-display: "Orbitron", sans-serif;
+  --font-body: "Rajdhani", sans-serif;
+  --font-mono: "JetBrains Mono Variable", monospace;
+
+  /* ── Spacing ── */
+  --gap-xs: 4px;
+  --gap-sm: 8px;
+  --gap-md: 12px;
+  --gap-lg: 16px;
+  --gap-xl: 24px;
+
+  /* ── Border radius ── */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+
+  /* ── Title bar height ── */
+  --titlebar-height: 50px;
+  --statusbar-height: 36px;
+}

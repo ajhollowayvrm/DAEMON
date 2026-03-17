@@ -1,0 +1,174 @@
+.tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: var(--gap-md);
+}
+
+.tab {
+  flex: 1;
+  padding: 6px 0;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  font-family: var(--font-display);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s;
+  text-align: center;
+}
+
+.tab:hover {
+  color: var(--text-secondary);
+}
+
+.tabActive {
+  color: var(--neon-cyan);
+  border-bottom-color: var(--neon-cyan);
+  text-shadow: 0 0 8px rgba(0, 255, 245, 0.4);
+}
+
+.tabBadge {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  margin-left: 4px;
+  color: var(--neon-magenta);
+}
+
+/* ── MR cards ── */
+
+.mrItem {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-xs);
+}
+
+.mrItem + .mrItem {
+  margin-top: var(--gap-sm);
+}
+
+.mrHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--gap-sm);
+}
+
+.mrId {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--neon-purple);
+  flex-shrink: 0;
+}
+
+.mrTitle {
+  font-size: 13px;
+  color: var(--text-primary);
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.mrDraft {
+  opacity: 0.6;
+}
+
+.mrMeta {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-sm);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-muted);
+  flex-wrap: wrap;
+}
+
+.author {
+  color: var(--text-secondary);
+}
+
+.branch {
+  color: var(--neon-purple);
+  opacity: 0.7;
+}
+
+.timeAgo {
+  color: var(--text-muted);
+}
+
+/* ── Status badges ── */
+
+.statusBadge {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  padding: 1px 6px;
+  border-radius: 8px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  flex-shrink: 0;
+}
+
+.pipelinePassed {
+  color: var(--neon-green);
+}
+
+.pipelineRunning {
+  color: var(--neon-cyan);
+  animation: neon-pulse 1.5s ease-in-out infinite;
+}
+
+.pipelineFailed {
+  color: var(--neon-red);
+}
+
+.conflicts {
+  background: rgba(255, 23, 68, 0.12);
+  color: var(--neon-red);
+  border: 1px solid rgba(255, 23, 68, 0.3);
+}
+
+.draftBadge {
+  background: rgba(168, 156, 200, 0.12);
+  color: var(--text-secondary);
+  border: 1px solid rgba(168, 156, 200, 0.2);
+}
+
+/* ── Approval info ── */
+
+.approvalRules {
+  display: flex;
+  gap: var(--gap-xs);
+  flex-wrap: wrap;
+}
+
+.approvalRule {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  padding: 1px 6px;
+  border-radius: 8px;
+  background: rgba(255, 107, 43, 0.12);
+  color: var(--neon-orange);
+  border: 1px solid rgba(255, 107, 43, 0.3);
+}
+
+.mentionBadge {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  padding: 1px 6px;
+  border-radius: 8px;
+  background: rgba(255, 44, 241, 0.12);
+  color: var(--neon-magenta);
+  border: 1px solid rgba(255, 44, 241, 0.3);
+}
+
+.emptyState {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--gap-xl);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-muted);
+}

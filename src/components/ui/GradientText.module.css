@@ -1,0 +1,9 @@
+.gradient {
+  background: linear-gradient(90deg, var(--neon-cyan), var(--neon-magenta));
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradient-shift 4s ease infinite;
+  filter: drop-shadow(0 0 6px rgba(0, 255, 245, 0.3));
+}

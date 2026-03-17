@@ -1,0 +1,123 @@
+/* ── Hover Tooltip — a neon line extends from the element, then text appears ── */
+
+.wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+/* ── The extending neon line ── */
+.line {
+  position: absolute;
+  top: 50%;
+  left: 100%;
+  height: 1px;
+  width: 0;
+  background: linear-gradient(
+    90deg,
+    var(--neon-cyan),
+    rgba(0, 255, 245, 0.4)
+  );
+  transform-origin: left center;
+  pointer-events: none;
+  z-index: 100;
+  transition: width 0.3s ease-out;
+  --line-length: 60px;
+}
+
+/* ── Dot at the elbow point ── */
+.line::before {
+  content: "";
+  position: absolute;
+  right: -2px;
+  top: -2px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--neon-cyan);
+  box-shadow: 0 0 6px rgba(0, 255, 245, 0.8);
+  opacity: 0;
+  transition: opacity 0.2s ease 0.25s;
+}
+
+/* ── The tooltip text at end of line ── */
+.text {
+  position: absolute;
+  left: calc(100% + var(--line-length, 60px) + 8px);
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--neon-cyan);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 100;
+  text-shadow: 0 0 8px rgba(0, 255, 245, 0.5);
+  overflow: hidden;
+  transition: opacity 0.2s ease 0.3s;
+}
+
+/* ── On hover: show line, dot, text ── */
+.wrapper:hover .line {
+  width: var(--line-length, 60px);
+}
+
+.wrapper:hover .line::before {
+  opacity: 1;
+}
+
+.wrapper:hover .text {
+  opacity: 1;
+  animation: typewriter 0.4s steps(20) 0.3s both;
+}
+
+/* ── Variant: line goes left instead of right ── */
+.lineLeft {
+  composes: line;
+  left: auto;
+  right: 100%;
+  transform-origin: right center;
+  background: linear-gradient(
+    90deg,
+    rgba(0, 255, 245, 0.4),
+    var(--neon-cyan)
+  );
+}
+
+.lineLeft::before {
+  right: auto;
+  left: -2px;
+}
+
+.textLeft {
+  composes: text;
+  left: auto;
+  right: calc(100% + var(--line-length, 60px) + 8px);
+}
+
+.wrapper:hover .lineLeft {
+  width: var(--line-length, 60px);
+}
+
+/* ── Variant: magenta color ── */
+.lineMagenta {
+  composes: line;
+  background: linear-gradient(
+    90deg,
+    var(--neon-magenta),
+    rgba(255, 44, 241, 0.4)
+  );
+}
+
+.lineMagenta::before {
+  background: var(--neon-magenta);
+  box-shadow: 0 0 6px rgba(255, 44, 241, 0.8);
+}
+
+.textMagenta {
+  composes: text;
+  color: var(--neon-magenta);
+  text-shadow: 0 0 8px rgba(255, 44, 241, 0.5);
+}

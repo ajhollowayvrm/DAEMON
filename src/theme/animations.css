@@ -1,0 +1,579 @@
+/* ── Neon pulse ── */
+@keyframes neon-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+/* ── Glow breathe (for active elements) ── */
+@keyframes glow-breathe {
+  0%,
+  100% {
+    box-shadow: 0 0 5px rgba(0, 255, 245, 0.4), 0 0 15px rgba(0, 255, 245, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 10px rgba(0, 255, 245, 0.6),
+      0 0 30px rgba(0, 255, 245, 0.3), 0 0 50px rgba(0, 255, 245, 0.15);
+  }
+}
+
+/* ── Scanline sweep ── */
+@keyframes scanline {
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(100vh);
+  }
+}
+
+/* ── Gradient text shimmer ── */
+@keyframes gradient-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* ── Fade in ── */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── Spinner rotation ── */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ── Status dot blink ── */
+@keyframes status-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+/* ── Grid perspective ── */
+@keyframes grid-scroll {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 0 50px;
+  }
+}
+
+/* ── Glitch effect — clip-path text distortion with color channel splitting ── */
+@keyframes glitch {
+  0%, 100% {
+    transform: translate(0);
+    text-shadow: none;
+  }
+  2% {
+    transform: translate(-2px, 1px);
+    text-shadow:
+      2px 0 rgba(255, 44, 241, 0.7),
+      -2px 0 rgba(0, 255, 245, 0.7);
+    clip-path: inset(20% 0 30% 0);
+  }
+  4% {
+    transform: translate(2px, -1px);
+    text-shadow:
+      -2px 0 rgba(255, 44, 241, 0.7),
+      2px 0 rgba(0, 255, 245, 0.7);
+    clip-path: inset(50% 0 10% 0);
+  }
+  6% {
+    transform: translate(0);
+    text-shadow: none;
+    clip-path: none;
+  }
+}
+
+/* ── HUD scan — horizontal line sweeps top to bottom ── */
+@keyframes hud-scan {
+  0% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  5% {
+    opacity: 1;
+  }
+  95% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(calc(100vh + 100%));
+    opacity: 0;
+  }
+}
+
+/* ── Data stream — vertical character streaming ── */
+@keyframes data-stream {
+  0% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.6;
+  }
+  90% {
+    opacity: 0.6;
+  }
+  100% {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+}
+
+/* ── Border trace — light running along a border (conic gradient rotation) ── */
+@keyframes border-trace {
+  0% {
+    --border-angle: 0deg;
+  }
+  100% {
+    --border-angle: 360deg;
+  }
+}
+
+/* ── Flicker — subtle CRT brightness flicker ── */
+@keyframes flicker {
+  0%, 100% {
+    opacity: 1;
+  }
+  8% {
+    opacity: 0.92;
+  }
+  10% {
+    opacity: 1;
+  }
+  32% {
+    opacity: 0.95;
+  }
+  34% {
+    opacity: 1;
+  }
+  55% {
+    opacity: 0.97;
+  }
+  57% {
+    opacity: 1;
+  }
+  82% {
+    opacity: 0.93;
+  }
+  84% {
+    opacity: 1;
+  }
+}
+
+/* ── Slide in from left ── */
+@keyframes slide-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* ── Slide in from right ── */
+@keyframes slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* ── Slide in from bottom ── */
+@keyframes slide-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── Color cycle — animated neon gradient shift ── */
+@keyframes color-cycle {
+  0% {
+    background-position: 0% 50%;
+  }
+  25% {
+    background-position: 50% 100%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  75% {
+    background-position: 50% 0%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* ── Pulse ring — expanding ring from a point ── */
+@keyframes pulse-ring {
+  0% {
+    transform: scale(1);
+    opacity: 0.6;
+    box-shadow: 0 0 0 0 rgba(0, 255, 245, 0.5);
+  }
+  70% {
+    transform: scale(1);
+    opacity: 0;
+    box-shadow: 0 0 0 8px rgba(0, 255, 245, 0);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0;
+    box-shadow: 0 0 0 0 rgba(0, 255, 245, 0);
+  }
+}
+
+/* ── Typewriter — text reveal character by character (use with steps) ── */
+@keyframes typewriter {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+/* ── Typewriter blink caret ── */
+@keyframes blink-caret {
+  0%, 100% {
+    border-color: var(--neon-cyan);
+  }
+  50% {
+    border-color: transparent;
+  }
+}
+
+/* ── Glitch bar — horizontal flash bar for scanline overlay ── */
+@keyframes glitch-bar {
+  0%, 100% {
+    opacity: 0;
+    transform: translateY(0) scaleY(1);
+  }
+  48% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 0.6;
+    transform: translateY(var(--glitch-y, 30vh)) scaleY(0.5);
+  }
+  52% {
+    opacity: 0;
+  }
+}
+
+/* ── Grid line pulse/breathe ── */
+@keyframes grid-breathe {
+  0%, 100% {
+    opacity: 0.03;
+  }
+  50% {
+    opacity: 0.07;
+  }
+}
+
+/* ── Diagonal scan sweep for cards ── */
+@keyframes diagonal-scan {
+  0% {
+    transform: translateX(-100%) skewX(-15deg);
+  }
+  100% {
+    transform: translateX(300%) skewX(-15deg);
+  }
+}
+
+/* ── Click flash ── */
+@keyframes click-flash {
+  0% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* ── Gradient line animation ── */
+@keyframes gradient-line-flow {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 200% 50%;
+  }
+}
+
+/* ── Header scan line ── */
+@keyframes header-scan {
+  0% {
+    left: -20%;
+  }
+  100% {
+    left: 120%;
+  }
+}
+
+/* ── Border glow pulse (for panels on hover) ── */
+@keyframes border-glow-pulse {
+  0%, 100% {
+    box-shadow: var(--panel-glow);
+  }
+  50% {
+    box-shadow:
+      0 0 2px rgba(0, 255, 245, 0.8),
+      0 0 8px rgba(0, 255, 245, 0.5),
+      0 0 20px rgba(0, 255, 245, 0.25),
+      inset 0 0 12px rgba(0, 255, 245, 0.08);
+  }
+}
+
+/* ── Vignette pulse ── */
+@keyframes vignette-breathe {
+  0%, 100% {
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 0.85;
+  }
+}
+
+/* ── Tooltip line grow ── */
+@keyframes line-grow {
+  from {
+    width: 0;
+  }
+  to {
+    width: var(--line-length, 60px);
+  }
+}
+
+/* ── Tooltip text appear ── */
+@keyframes tooltip-appear {
+  from {
+    opacity: 0;
+    transform: translateY(2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── Viewport border glow — breathing cyan/magenta ── */
+@keyframes viewport-border-glow {
+  0%, 100% {
+    box-shadow:
+      inset 0 0 30px rgba(0, 255, 245, 0.08),
+      inset 0 0 60px rgba(0, 255, 245, 0.04),
+      0 0 20px rgba(0, 255, 245, 0.06);
+  }
+  50% {
+    box-shadow:
+      inset 0 0 30px rgba(255, 44, 241, 0.08),
+      inset 0 0 60px rgba(255, 44, 241, 0.04),
+      0 0 20px rgba(255, 44, 241, 0.06);
+  }
+}
+
+/* ── Matrix rain — vertical character scroll ── */
+@keyframes matrix-rain {
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(100vh);
+  }
+}
+
+/* ── Floating particle drift ── */
+@keyframes particle-drift-1 {
+  0% {
+    transform: translate(0, 0);
+    opacity: 0;
+  }
+  10% {
+    opacity: var(--particle-opacity, 0.15);
+  }
+  90% {
+    opacity: var(--particle-opacity, 0.15);
+  }
+  100% {
+    transform: translate(var(--drift-x, 80px), var(--drift-y, -120px));
+    opacity: 0;
+  }
+}
+
+@keyframes particle-drift-2 {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0;
+  }
+  15% {
+    opacity: var(--particle-opacity, 0.12);
+  }
+  50% {
+    transform: translate(calc(var(--drift-x, 60px) * 0.5), calc(var(--drift-y, -80px) * 0.5)) scale(1.3);
+  }
+  85% {
+    opacity: var(--particle-opacity, 0.12);
+  }
+  100% {
+    transform: translate(var(--drift-x, 60px), var(--drift-y, -80px)) scale(0.8);
+    opacity: 0;
+  }
+}
+
+/* ── Grid cross pulse ── */
+@keyframes cross-pulse {
+  0%, 100% {
+    opacity: 0.08;
+  }
+  50% {
+    opacity: 0.25;
+  }
+}
+
+/* ── Grid intersection node glow ── */
+@keyframes node-glow {
+  0%, 100% {
+    box-shadow: 0 0 4px rgba(0, 255, 245, 0.4), 0 0 8px rgba(0, 255, 245, 0.2);
+    opacity: 0.5;
+  }
+  50% {
+    box-shadow: 0 0 8px rgba(176, 38, 255, 0.6), 0 0 16px rgba(176, 38, 255, 0.3);
+    opacity: 0.9;
+  }
+}
+
+/* ── Header shimmer — continuous gradient sweep ── */
+@keyframes header-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* ── Dot expanding ring ── */
+@keyframes dot-ring-expand {
+  0% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(3.5);
+    opacity: 0;
+  }
+}
+
+/* ── Marquee scroll for data ticker ── */
+@keyframes marquee-scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+/* ── Ghost text offset drift ── */
+@keyframes ghost-drift {
+  0%, 100% {
+    transform: translate(-1px, 1px);
+    opacity: 0.15;
+  }
+  25% {
+    transform: translate(2px, -1px);
+    opacity: 0.25;
+  }
+  50% {
+    transform: translate(-2px, 2px);
+    opacity: 0.1;
+  }
+  75% {
+    transform: translate(1px, -2px);
+    opacity: 0.2;
+  }
+}
+
+/* ── HUD dot expanding ring ── */
+@keyframes hud-dot-ring {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.6;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(4);
+    opacity: 0;
+  }
+}
+
+/* ── Boot sequence line fade in ── */
+@keyframes boot-line-in {
+  0% {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* ── Boot overlay fade out ── */
+@keyframes boot-fade-out {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* ── Boot cursor blink ── */
+@keyframes boot-cursor-blink {
+  0%, 50% {
+    opacity: 1;
+  }
+  51%, 100% {
+    opacity: 0;
+  }
+}

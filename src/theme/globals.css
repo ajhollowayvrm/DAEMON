@@ -1,0 +1,118 @@
+@import "./fonts.css";
+@import "./variables.css";
+@import "./animations.css";
+
+/* ── Reset ── */
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* ── Base ── */
+html,
+body,
+#root {
+  height: 100%;
+  overflow: hidden;
+  background-color: var(--bg-deepest);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  user-select: none;
+}
+
+/* ── Pulsing border glow around the entire viewport ── */
+#root {
+  animation: viewport-border-glow 6s ease-in-out infinite;
+  border: 1px solid rgba(0, 255, 245, 0.06);
+}
+
+/* ── Animated gradient mesh background ── */
+body {
+  background:
+    radial-gradient(ellipse at 15% 20%, rgba(176, 38, 255, 0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 85% 80%, rgba(0, 255, 245, 0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 50%, rgba(255, 44, 241, 0.04) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 20%, rgba(57, 255, 20, 0.03) 0%, transparent 40%),
+    var(--bg-deepest);
+  background-size: 100% 100%;
+}
+
+/* ── Retro grid background (more prominent, breathing) ── */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image: linear-gradient(
+      rgba(176, 38, 255, 0.06) 1px,
+      transparent 1px
+    ),
+    linear-gradient(90deg, rgba(176, 38, 255, 0.06) 1px, transparent 1px);
+  background-size: 50px 50px;
+  animation: grid-scroll 4s linear infinite, grid-breathe 6s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── Vignette overlay (darkened edges) ── */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(
+    ellipse at 50% 50%,
+    transparent 55%,
+    rgba(0, 0, 0, 0.4) 85%,
+    rgba(0, 0, 0, 0.7) 100%
+  );
+  pointer-events: none;
+  z-index: 0;
+  animation: vignette-breathe 10s ease-in-out infinite;
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-deep);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--bg-hover);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--neon-purple-dim);
+}
+
+/* ── Selection ── */
+::selection {
+  background: rgba(176, 38, 255, 0.3);
+  color: var(--text-bright);
+}
+
+/* ── Links ── */
+a {
+  color: var(--neon-cyan);
+  text-decoration: none;
+}
+
+a:hover {
+  text-shadow: var(--glow-cyan);
+}
+
+/* ── Focus visible ── */
+:focus-visible {
+  outline: 1px solid var(--neon-cyan);
+  outline-offset: 2px;
+}
