@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-export type PanelId = "hub" | "slack" | "gitlab" | "agents" | "linear" | "todos";
+export type PanelId = "hub" | "slack" | "gitlab" | "agents" | "linear" | "todos" | "archive" | "browser" | "datadog";
 
 export interface PendingThread {
   channelId: string;
@@ -18,6 +18,8 @@ interface LayoutState {
   booting: boolean;
   pendingThread: PendingThread | null;
   pendingMR: PendingMR | null;
+  pendingLinearId: string | null;
+  pendingMonitorId: number | null;
 
   // Navigation history
   historyBack: PanelId[];
@@ -31,6 +33,10 @@ interface LayoutState {
   clearPendingThread: () => void;
   openMR: (mr: PendingMR) => void;
   clearPendingMR: () => void;
+  openLinearTicket: (identifier: string) => void;
+  clearPendingLinear: () => void;
+  openMonitor: (monitorId: number) => void;
+  clearPendingMonitor: () => void;
   toggleSidebar: () => void;
   goBack: () => void;
   goForward: () => void;
@@ -42,6 +48,8 @@ export const useLayoutStore = create<LayoutState>((set, get) => ({
   booting: true,
   pendingThread: null,
   pendingMR: null,
+  pendingMonitorId: null,
+  pendingLinearId: null,
   historyBack: [],
   historyForward: [],
   canGoBack: false,
@@ -90,6 +98,36 @@ export const useLayoutStore = create<LayoutState>((set, get) => ({
   },
 
   clearPendingMR: () => set({ pendingMR: null }),
+
+  openLinearTicket: (identifier) => {
+    const { activePanel, historyBack } = get();
+    const newBack = activePanel === "linear" ? historyBack : [...historyBack, activePanel];
+    set({
+      activePanel: "linear",
+      pendingLinearId: identifier,
+      historyBack: newBack,
+      historyForward: [],
+      canGoBack: newBack.length > 0,
+      canGoForward: false,
+    });
+  },
+
+  clearPendingLinear: () => set({ pendingLinearId: null }),
+
+  openMonitor: (monitorId) => {
+    const { activePanel, historyBack } = get();
+    const newBack = activePanel === "datadog" ? historyBack : [...historyBack, activePanel];
+    set({
+      activePanel: "datadog",
+      pendingMonitorId: monitorId,
+      historyBack: newBack,
+      historyForward: [],
+      canGoBack: newBack.length > 0,
+      canGoForward: false,
+    });
+  },
+
+  clearPendingMonitor: () => set({ pendingMonitorId: null }),
 
   toggleSidebar: () => set((s) => ({ sidebarCollapsed: !s.sidebarCollapsed })),
 

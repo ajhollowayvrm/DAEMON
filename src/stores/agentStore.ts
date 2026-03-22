@@ -6,7 +6,7 @@ export interface RunningTask {
   id: string;
   command: string;
   args: string;
-  contextSource?: "slack" | "gitlab" | "linear";
+  contextSource?: "slack" | "gitlab" | "linear" | "datadog";
   contextData?: Record<string, unknown>;
   output: string[];
   status: TaskStatus;

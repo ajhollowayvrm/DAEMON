@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { createPortal } from "react-dom";
 import { useQueryClient } from "@tanstack/react-query";
-import { LayoutList, ArrowLeft, ExternalLink, ChevronDown, ListPlus, CheckSquare } from "lucide-react";
+import { LayoutList, ArrowLeft, ExternalLink, ChevronDown, ListPlus, CheckSquare, Copy } from "lucide-react";
 import { open } from "@tauri-apps/plugin-shell";
 import Markdown from "react-markdown";
 import { Panel } from "../../components/layout/Panel";
@@ -15,6 +15,8 @@ import { useLayoutStore } from "../../stores/layoutStore";
 import { useTodos } from "../../hooks/useTodos";
 import { addLinearComment, fetchWorkflowStates, updateIssueStatus } from "../../services/tauri-bridge";
 import { CreateTodoModal } from "../../components/ui/CreateTodoModal";
+import { AddToFocusButton } from "../../components/ui/AddToFocusButton";
+import { RelatedItems, CorrelationBadge } from "../../components/ui/RelatedItems";
 import { ActionMenu } from "../../components/ai/ActionMenu";
 import { AgentPromptBar } from "../../components/ai/AgentPromptBar";
 import type { LinearIssue, WorkflowState } from "../../types/models";
@@ -207,6 +209,19 @@ function IssueCard({
               >
                 {issue.status}
               </motion.span>
+              <AddToFocusButton
+                compact
+                link={{
+                  source: "linear",
+                  label: issue.title,
+                  subtitle: `${issue.identifier} · ${issue.status}`,
+                  url: issue.url,
+                  navigateTo: "linear",
+                  sourceId: issue.identifier,
+                }}
+                title={issue.title}
+              />
+              <CorrelationBadge entityId={`linear:${issue.identifier}`} />
               <button
                 className={styles.quickTodoBtn}
                 onClick={(e) => {
@@ -437,6 +452,18 @@ function IssueDetailView({
         <span className={styles.detailId}>{identifier}</span>
         {detail && (
           <>
+            <AddToFocusButton
+              link={{
+                source: "linear",
+                label: detail.title,
+                subtitle: `${detail.identifier} · ${detail.status}`,
+                url: detail.url,
+                navigateTo: "linear",
+                sourceId: detail.identifier,
+              }}
+              title={detail.title}
+            />
+            <CorrelationBadge entityId={`linear:${identifier}`} />
             <button
               className={styles.externalBtn}
               onClick={() => setShowCreateTodo(true)}
@@ -450,6 +477,13 @@ function IssueDetailView({
               title="Open in Linear"
             >
               <ExternalLink size={12} />
+            </button>
+            <button
+              className={styles.externalBtn}
+              onClick={() => navigator.clipboard.writeText(detail.url)}
+              title="Copy link"
+            >
+              <Copy size={12} />
             </button>
             <ActionMenu
               source="linear"
@@ -517,6 +551,9 @@ function IssueDetailView({
             )}
           </div>
 
+          {/* Cross-panel correlations */}
+          <RelatedItems entityId={`linear:${detail.identifier}`} />
+
           {detail.description && (
             <div className={styles.detailDescription}>
               <div className={styles.markdown}><Markdown>{detail.description}</Markdown></div>
@@ -567,6 +604,32 @@ export function LinearPanel() {
   const [selectedIssue, setSelectedIssue] = useState<string | null>(null);
   const { data: allIssues, isLoading, isError, refetch } = useLinearIssues();
   const { todos } = useTodos();
+  const pendingLinearId = useLayoutStore((s) => s.pendingLinearId);
+  const clearPendingLinear = useLayoutStore((s) => s.clearPendingLinear);
+
+  // Deep-link: open a specific ticket when navigated from another panel
+  useEffect(() => {
+    if (pendingLinearId) {
+      if (allIssues) {
+        const issue = allIssues.find((i) => i.identifier === pendingLinearId);
+        if (issue) {
+          setSelectedIssue(issue.identifier);
+          // Switch to the right tab
+          if (issue.assignee_is_me) setTab("mine");
+          else if (issue.assignee_is_team) setTab("team");
+          else setTab("ready");
+        } else {
+          // Issue not in current data — open detail view directly by identifier
+          setSelectedIssue(pendingLinearId);
+          refetch();
+        }
+      } else {
+        // Data not loaded yet — set it and it'll resolve when data arrives
+        setSelectedIssue(pendingLinearId);
+      }
+      clearPendingLinear();
+    }
+  }, [pendingLinearId, allIssues, clearPendingLinear, refetch]);
   const todoUrls = useMemo(() => new Set(todos.filter((t) => t.url).map((t) => t.url!)), [todos]);
 
   const { myIssues, teamIssues, readyIssues } = useMemo(() => {

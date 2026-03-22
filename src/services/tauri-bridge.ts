@@ -17,6 +17,18 @@ export function fetchThreadReplies(channelId: string, threadTs: string): Promise
   return invoke<SlackMessage[]>("get_thread_replies", { channelId, threadTs });
 }
 
+export function sendSlackMessage(
+  channelId: string,
+  text: string,
+  threadTs?: string,
+): Promise<SlackMessage> {
+  return invoke<SlackMessage>("send_slack_message", { channelId, text, threadTs });
+}
+
+export function fetchDmConversations(): Promise<import("../types/models").DmConversation[]> {
+  return invoke<import("../types/models").DmConversation[]>("get_dm_conversations");
+}
+
 export function markAsRead(channelId: string, ts: string): Promise<boolean> {
   return invoke<boolean>("mark_as_read", { channelId, ts });
 }
@@ -35,6 +47,10 @@ export function checkGitlabConnection(): Promise<string> {
 
 export function fetchMRDetail(projectId: number, mrIid: number): Promise<MRDetail> {
   return invoke<MRDetail>("get_mr_detail", { projectId, mrIid });
+}
+
+export function fetchMRDiff(projectId: number, mrIid: number): Promise<import("../types/models").MRDiff> {
+  return invoke<import("../types/models").MRDiff>("get_mr_diff", { projectId, mrIid });
 }
 
 export function mergeMR(projectId: number, mrIid: number): Promise<boolean> {
@@ -71,6 +87,12 @@ export function fetchWorkflowStates(teamId: string): Promise<WorkflowState[]> {
 
 export function updateIssueStatus(issueId: string, stateId: string): Promise<boolean> {
   return invoke<boolean>("update_issue_status", { issueId, stateId });
+}
+
+// ── Datadog ──
+
+export function fetchDatadogMonitors(): Promise<import("../types/models").DatadogMonitor[]> {
+  return invoke<import("../types/models").DatadogMonitor[]>("get_datadog_monitors");
 }
 
 // ── PTY agent functions ──

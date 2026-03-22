@@ -675,3 +675,232 @@
   background: #ff9933;
   box-shadow: 0 0 6px rgba(255, 153, 51, 0.5);
 }
+
+/* ── Handoff Bar ── */
+
+.handoffBar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-top: 1px solid rgba(176, 38, 255, 0.1);
+  background: rgba(10, 10, 30, 0.4);
+  flex-wrap: wrap;
+  min-height: 36px;
+}
+
+.handoffBtn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  background: rgba(10, 10, 30, 0.6);
+  border: 1px solid var(--agent-color, rgba(176, 38, 255, 0.2));
+  border-radius: 16px;
+  color: var(--text-secondary);
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.handoffBtn:hover {
+  border-color: var(--agent-color, var(--neon-cyan));
+  background: color-mix(in srgb, var(--agent-color, var(--neon-cyan)) 8%, transparent);
+  color: var(--text-primary);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--agent-color, var(--neon-cyan)) 20%, transparent);
+}
+
+.handoffAvatar {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 1px solid var(--agent-color, rgba(176, 38, 255, 0.3));
+  flex-shrink: 0;
+}
+
+.handoffName {
+  color: var(--agent-color, var(--text-primary));
+}
+
+.handoffRole {
+  color: var(--text-muted);
+  font-weight: 400;
+  font-size: 9px;
+  text-transform: none;
+}
+
+.handoffMore {
+  padding: 4px 10px;
+  background: transparent;
+  border: 1px dashed rgba(176, 38, 255, 0.15);
+  border-radius: 16px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  margin-left: auto;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.handoffMore:hover {
+  border-color: var(--neon-cyan);
+  color: var(--neon-cyan);
+}
+
+.handoffAll {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  width: 100%;
+  padding-top: 6px;
+  overflow: hidden;
+}
+
+/* ── Focus Item Context Banner ── */
+
+.focusBanner {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+  flex-shrink: 1;
+  min-width: 0;
+}
+
+.focusBannerBtn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  background: rgba(176,38,255,0.06);
+  border: 1px solid rgba(176,38,255,0.15);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.12s;
+  max-width: 200px;
+}
+
+.focusBannerBtn:hover {
+  background: rgba(176,38,255,0.12);
+  border-color: rgba(176,38,255,0.3);
+}
+
+.focusBannerIcon {
+  color: var(--neon-purple);
+  opacity: 0.6;
+  flex-shrink: 0;
+}
+
+.focusBannerTitle {
+  font-family: var(--font-body);
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--neon-purple);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+  min-width: 0;
+}
+
+.focusBannerLinks {
+  display: none;
+}
+
+/* ── Focus Item Hover Preview ── */
+
+.focusPreview {
+  position: fixed;
+  z-index: 200;
+  background: var(--bg-surface);
+  border: 1px solid rgba(176,38,255,0.25);
+  border-radius: var(--radius-md);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5), 0 0 12px rgba(176,38,255,0.08);
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 220px;
+  overflow-y: auto;
+  width: 260px;
+}
+
+.focusPreviewTitle {
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--neon-purple);
+  line-height: 1.3;
+  word-break: break-word;
+}
+
+.focusPreviewSection {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.focusPreviewLabel {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-display);
+  font-size: 8px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  opacity: 0.6;
+}
+
+.focusPreviewLink {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-secondary);
+  padding: 1px 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.focusPreviewLink span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.focusPreviewIcon_slack  { color: var(--neon-cyan); opacity: 0.6; }
+.focusPreviewIcon_gitlab { color: var(--neon-purple); opacity: 0.6; }
+.focusPreviewIcon_linear { color: var(--neon-magenta); opacity: 0.6; }
+.focusPreviewIcon_todos  { color: var(--neon-green); opacity: 0.6; }
+
+.focusPreviewTask {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-body);
+  font-size: 10px;
+  color: var(--text-secondary);
+  padding: 1px 0;
+}
+
+.focusPreviewTaskDone {
+  opacity: 0.4;
+  text-decoration: line-through;
+  text-decoration-color: var(--neon-green);
+}
+
+.focusPreviewNote {
+  font-family: var(--font-body);
+  font-size: 10px;
+  color: var(--text-muted);
+  padding: 1px 0;
+  font-style: italic;
+}

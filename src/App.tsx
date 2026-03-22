@@ -13,6 +13,8 @@ import { HudDecorations } from "./components/ui/HudDecorations";
 import { BootSequence } from "./components/ui/BootSequence";
 import { SettingsModal } from "./components/ui/SettingsModal";
 import { TerminalDrawer } from "./components/ai/TerminalDrawer";
+import { AgentToastContainer } from "./components/ui/AgentToastContainer";
+import { useCorrelationEngine, useMonitorDetectors } from "./hooks";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -24,9 +26,16 @@ const queryClient = new QueryClient({
   },
 });
 
-function App() {
+/** Inner shell — must be inside QueryClientProvider for useMonitorDetectors */
+function DaemonShell() {
   const [showSettings, setShowSettings] = useState(false);
   const [bootKey, setBootKey] = useState(0);
+
+  // Proactive monitoring — detects events from React Query cache updates
+  useMonitorDetectors();
+
+  // Cross-panel intelligence — builds correlation index from all data sources
+  useCorrelationEngine();
 
   useEffect(() => {
     const unlistenSettings = listen("open-settings", () => {
@@ -42,31 +51,40 @@ function App() {
   }, []);
 
   return (
+    <>
+      <LavaBackground />
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          height: "100vh",
+          position: "relative",
+          zIndex: 1,
+        }}
+      >
+        <TitleBar />
+        <AppShell />
+        <StatusBar onOpenSettings={() => setShowSettings(true)} />
+        <TerminalDrawer />
+        <ScanlineOverlay />
+        <HudDecorations />
+        <AgentToastContainer />
+        <BootSequence key={bootKey} forcePlay={bootKey > 0} />
+        <AnimatePresence>
+          {showSettings && (
+            <SettingsModal onClose={() => setShowSettings(false)} />
+          )}
+        </AnimatePresence>
+      </div>
+    </>
+  );
+}
+
+function App() {
+  return (
     <ThemeProvider>
       <QueryClientProvider client={queryClient}>
-        <LavaBackground />
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            height: "100vh",
-            position: "relative",
-            zIndex: 1,
-          }}
-        >
-          <TitleBar />
-          <AppShell />
-          <StatusBar onOpenSettings={() => setShowSettings(true)} />
-          <TerminalDrawer />
-          <ScanlineOverlay />
-          <HudDecorations />
-          <BootSequence key={bootKey} forcePlay={bootKey > 0} />
-          <AnimatePresence>
-            {showSettings && (
-              <SettingsModal onClose={() => setShowSettings(false)} />
-            )}
-          </AnimatePresence>
-        </div>
+        <DaemonShell />
       </QueryClientProvider>
     </ThemeProvider>
   );

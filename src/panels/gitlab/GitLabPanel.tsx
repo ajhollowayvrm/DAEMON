@@ -10,6 +10,8 @@ import { MRDetailView } from "./MRDetailView";
 import { ActionMenu } from "../../components/ai/ActionMenu";
 import { useLayoutStore } from "../../stores/layoutStore";
 import { CreateTodoModal, type CreateTodoPreset } from "../../components/ui/CreateTodoModal";
+import { AddToFocusButton } from "../../components/ui/AddToFocusButton";
+import { CorrelationBadge } from "../../components/ui/RelatedItems";
 import { useTodos } from "../../hooks/useTodos";
 import type { EnrichedMergeRequest } from "../../types/models";
 import styles from "./GitLabPanel.module.css";
@@ -51,6 +53,27 @@ const badgePopVariants = {
     },
   },
 } satisfies Record<string, object>;
+
+/** Extract short repo name from MR web_url (e.g. "frontend" from "https://gitlab.com/nectarhr/frontend/-/merge_requests/123") */
+function repoFromUrl(url: string): string {
+  try {
+    const parts = url.split("/-/")[0].split("/");
+    return parts[parts.length - 1] || "unknown";
+  } catch {
+    return "unknown";
+  }
+}
+
+/** Group MRs by repo, preserving order within each group */
+function groupByRepo(mrs: EnrichedMergeRequest[]): [string, EnrichedMergeRequest[]][] {
+  const groups = new Map<string, EnrichedMergeRequest[]>();
+  for (const mr of mrs) {
+    const repo = repoFromUrl(mr.web_url);
+    if (!groups.has(repo)) groups.set(repo, []);
+    groups.get(repo)!.push(mr);
+  }
+  return Array.from(groups.entries());
+}
 
 /** Generate smart suggested to-do titles based on MR state */
 function getSuggestedTodoActions(mr: EnrichedMergeRequest): { title: string; priority: CreateTodoPreset["priority"] }[] {
@@ -183,6 +206,20 @@ function MRCard({ mr, onSelect, hasTodo }: { mr: EnrichedMergeRequest; onSelect:
                   animate="visible"
                 >@you</motion.span>
               )}
+              <AddToFocusButton
+                compact
+                link={{
+                  source: "gitlab",
+                  label: mr.title,
+                  subtitle: `!${mr.iid} · ${mr.author}`,
+                  url: mr.web_url,
+                  navigateTo: "gitlab",
+                  sourceId: String(mr.iid),
+                  sourceBranch: mr.source_branch,
+                }}
+                title={mr.title}
+              />
+              <CorrelationBadge entityId={`gitlab:${mr.iid}`} />
               <button
                 className={styles.quickTodoBtn}
                 onClick={(e) => {
@@ -294,6 +331,8 @@ export function GitLabPanel() {
           ? mentionMRs
           : myMRs;
 
+  const groupedMRs = useMemo(() => groupByRepo(currentMRs), [currentMRs]);
+
   const badge = currentMRs.length;
 
   return (
@@ -361,21 +400,29 @@ export function GitLabPanel() {
               <div className={styles.emptyState}>No merge requests</div>
             )}
             <AnimatePresence>
-              {currentMRs.map((mr, i) => (
-                <motion.div
-                  key={mr.id}
-                  custom={i}
-                  variants={mrCardVariants}
-                  initial="hidden"
-                  animate="visible"
-                  exit="exit"
-                >
-                  <MRCard
-                    mr={mr}
-                    hasTodo={todoUrls.has(mr.web_url)}
-                    onSelect={() => setSelectedMR({ projectId: mr.project_id, iid: mr.iid })}
-                  />
-                </motion.div>
+              {groupedMRs.map(([repo, mrs]) => (
+                <div key={repo}>
+                  <div className={styles.repoHeader}>
+                    <span className={styles.repoName}>{repo}</span>
+                    <span className={styles.repoCount}>{mrs.length}</span>
+                  </div>
+                  {mrs.map((mr, i) => (
+                    <motion.div
+                      key={mr.id}
+                      custom={i}
+                      variants={mrCardVariants}
+                      initial="hidden"
+                      animate="visible"
+                      exit="exit"
+                    >
+                      <MRCard
+                        mr={mr}
+                        hasTodo={todoUrls.has(mr.web_url)}
+                        onSelect={() => setSelectedMR({ projectId: mr.project_id, iid: mr.iid })}
+                      />
+                    </motion.div>
+                  ))}
+                </div>
               ))}
             </AnimatePresence>
           </motion.div>

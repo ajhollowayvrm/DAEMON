@@ -1,7 +1,6 @@
 import { type ReactNode } from "react";
 import { motion } from "framer-motion";
 import styles from "./GlowCard.module.css";
-import { useTheme } from "../../themes";
 
 interface GlowCardProps {
   children: ReactNode;
@@ -68,34 +67,14 @@ const urgentHoverState = {
 
 
 export function GlowCard({ children, urgent, className, onClick, index = 0 }: GlowCardProps) {
-  const { theme } = useTheme();
-  const isLcars = theme.layoutStyle === "lcars";
-
   const classNames = [
     styles.card,
     urgent ? styles.urgent : "",
     onClick ? styles.clickable : "",
-    isLcars ? styles.cardLcars : "",
-    isLcars && urgent ? styles.urgentLcars : "",
     className ?? "",
   ]
     .filter(Boolean)
     .join(" ");
-
-  if (isLcars) {
-    // LCARS: no framer-motion animations — clean flat Federation style
-    return (
-      <div
-        className={classNames}
-        onClick={onClick}
-        role={onClick ? "button" : undefined}
-        tabIndex={onClick ? 0 : undefined}
-        onKeyDown={onClick ? (e) => { if (e.key === "Enter") onClick(); } : undefined}
-      >
-        {children}
-      </div>
-    );
-  }
 
   return (
     <motion.div

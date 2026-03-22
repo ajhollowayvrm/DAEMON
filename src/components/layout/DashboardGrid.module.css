@@ -82,20 +82,3 @@
   transform: translate(-50%, -50%);
 }
 
-/* ═══════════════════════════════════════════════════════════════════
-   LCARS Layout Variant — black gaps between panels, no glow lines
-   ═══════════════════════════════════════════════════════════════════ */
-
-.gridLcars {
-  gap: 6px;
-  padding: 6px;
-  background: #000000;
-}
-
-.gridLcars::before {
-  display: none;
-}
-
-.gridLcars::after {
-  display: none;
-}

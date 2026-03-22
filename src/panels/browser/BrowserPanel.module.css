@@ -1,0 +1,222 @@
+.browser {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+/* Toolbar */
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  flex-shrink: 0;
+}
+
+.navBtns {
+  display: flex;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.navBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.12s;
+}
+
+.navBtn:hover:not(:disabled) {
+  color: var(--neon-cyan);
+  border-color: rgba(0,255,245,0.2);
+  background: rgba(0,255,245,0.04);
+}
+
+.navBtn:disabled {
+  opacity: 0.25;
+  cursor: default;
+}
+
+.spinning {
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* URL bar */
+.urlBar {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(0,0,0,0.2);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: var(--radius-sm);
+  padding: 4px 8px;
+  transition: border-color 0.15s;
+}
+
+.urlBar:focus-within {
+  border-color: rgba(0,255,245,0.3);
+  box-shadow: 0 0 6px rgba(0,255,245,0.06);
+}
+
+.urlIcon {
+  color: var(--text-muted);
+  opacity: 0.4;
+  flex-shrink: 0;
+}
+
+.urlInput {
+  flex: 1;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-primary);
+  background: transparent;
+  border: none;
+  outline: none;
+}
+
+.urlInput::placeholder {
+  color: var(--text-muted);
+  opacity: 0.4;
+}
+
+.urlClear {
+  display: flex;
+  align-items: center;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  opacity: 0.3;
+  transition: opacity 0.12s;
+  padding: 0;
+}
+
+.urlClear:hover {
+  opacity: 1;
+  color: var(--neon-red, #ff3366);
+}
+
+.externalBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.12s;
+  flex-shrink: 0;
+}
+
+.externalBtn:hover {
+  color: var(--neon-cyan);
+  border-color: rgba(0,255,245,0.3);
+}
+
+/* Home page */
+.homePage {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 40px;
+}
+
+.homeTitle {
+  font-family: var(--font-display);
+  font-size: 16px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--neon-cyan);
+  opacity: 0.4;
+}
+
+.homeHint {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-muted);
+  opacity: 0.4;
+}
+
+.bookmarks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+  margin-top: 12px;
+}
+
+.bookmark {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: var(--bg-raised);
+  border: 1px solid rgba(0,255,245,0.1);
+  border-radius: var(--radius-md);
+  font-family: var(--font-display);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.bookmark:hover {
+  border-color: rgba(0,255,245,0.3);
+  background: var(--bg-surface);
+  color: var(--neon-cyan);
+  box-shadow: 0 0 8px rgba(0,255,245,0.06);
+}
+
+/* Iframe */
+.iframeContainer {
+  flex: 1;
+  position: relative;
+  min-height: 0;
+}
+
+.iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  background: var(--bg-surface, #1a1a2e);
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
+}
+
+.loadingBar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 2px;
+  background: var(--neon-cyan);
+  box-shadow: 0 0 8px rgba(0,255,245,0.5);
+  animation: loadProgress 2s ease-in-out infinite;
+}
+
+@keyframes loadProgress {
+  0% { width: 0; left: 0; }
+  50% { width: 60%; left: 20%; }
+  100% { width: 0; left: 100%; }
+}

@@ -1,17 +1,20 @@
 import { useState, useRef } from "react";
 import { createPortal } from "react-dom";
-import { ArrowLeft, ExternalLink, GitMerge, MessageSquare, Play, RotateCw, ListPlus } from "lucide-react";
+import { ArrowLeft, ExternalLink, GitMerge, MessageSquare, Play, RotateCw, ListPlus, Code, ChevronDown, ChevronRight, Send } from "lucide-react";
 import { open } from "@tauri-apps/plugin-shell";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Markdown from "react-markdown";
 import { NeonButton } from "../../components/ui/NeonButton";
 import { RetroLoader } from "../../components/ui/RetroLoader";
 import { ErrorState } from "../../components/ui/ErrorState";
+import { DiffViewer } from "../../components/ui/DiffViewer";
 import { ActionMenu } from "../../components/ai/ActionMenu";
 import { AgentPromptBar } from "../../components/ai/AgentPromptBar";
-import { fetchMRDetail, mergeMR, addMRNote, playJob, retryJob } from "../../services/tauri-bridge";
+import { fetchMRDetail, fetchMRDiff, mergeMR, addMRNote, playJob, retryJob, sendSlackMessage } from "../../services/tauri-bridge";
 import { CreateTodoModal } from "../../components/ui/CreateTodoModal";
-import type { PipelineJob, ApprovalRuleInfo, DiscussionThread } from "../../types/models";
+import { AddToFocusButton } from "../../components/ui/AddToFocusButton";
+import { RelatedItems, CorrelationBadge } from "../../components/ui/RelatedItems";
+import type { PipelineJob, ApprovalRuleInfo, DiscussionThread, MRDiff } from "../../types/models";
 import styles from "./MRDetailView.module.css";
 
 function timeAgo(dateStr: string): string {
@@ -47,6 +50,42 @@ function stageStatus(jobs: PipelineJob[]): string {
   if (jobs.every((j) => j.status === "manual")) return "manual";
   if (jobs.every((j) => j.status === "skipped")) return "skipped";
   return "pending";
+}
+
+// ── Changes / Diff Section ───────────────────────────────────
+function ChangesSection({ projectId, mrIid, changesCount }: { projectId: number; mrIid: number; changesCount: string }) {
+  const [expanded, setExpanded] = useState(false);
+  const { data: diff, isLoading, isError, refetch } = useQuery<MRDiff>({
+    queryKey: ["gitlab", "diff", projectId, mrIid],
+    queryFn: () => fetchMRDiff(projectId, mrIid),
+    enabled: expanded,
+    staleTime: 5 * 60_000,
+  });
+
+  return (
+    <div className={styles.changesSection}>
+      <button className={styles.changesSectionHeader} onClick={() => setExpanded(!expanded)}>
+        <span className={styles.changesChevron}>
+          {expanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
+        </span>
+        <Code size={12} />
+        <span className={styles.sectionTitle} style={{ flex: 1 }}>Changes</span>
+        <span className={styles.changes}>{changesCount} files</span>
+      </button>
+      {expanded && (
+        <div className={styles.changesBody}>
+          {isLoading && <div className={styles.changesLoading}>Loading diff...</div>}
+          {isError && (
+            <div className={styles.changesError}>
+              Failed to load diff.{" "}
+              <button onClick={() => refetch()} className={styles.retryLink}>Retry</button>
+            </div>
+          )}
+          {diff && <DiffViewer files={diff.files} />}
+        </div>
+      )}
+    </div>
+  );
 }
 
 function PipelineView({ jobs, status, projectId, onRefresh }: { jobs: PipelineJob[]; status: string | null; projectId: number; onRefresh: () => void }) {
@@ -235,6 +274,29 @@ export function MRDetailView({
   const [commentText, setCommentText] = useState("");
   const [posting, setPosting] = useState(false);
   const [showCreateTodo, setShowCreateTodo] = useState(false);
+  const [postingForReview, setPostingForReview] = useState(false);
+  const [postedForReview, setPostedForReview] = useState(false);
+
+  // "Post for Review" — posts to #schema-change-reviews or a configurable channel
+  const REVIEW_CHANNEL_ID = "C0ALT18EQHH"; // #schema-change-reviews
+  const handlePostForReview = async () => {
+    if (!mr || postingForReview) return;
+    setPostingForReview(true);
+    try {
+      // Extract ticket ID from branch name (e.g., SUR-940-add-feature → SUR-940)
+      const ticketMatch = mr.source_branch.match(/^([A-Z]+-\d+)/);
+      const ticketId = ticketMatch ? ticketMatch[1] : "";
+      const summary = mr.title.replace(/^(draft:\s*)?/i, "");
+      const message = ticketId
+        ? `${ticketId}: ${summary}\n${mr.web_url}`
+        : `${summary}\n${mr.web_url}`;
+      await sendSlackMessage(REVIEW_CHANNEL_ID, message);
+      setPostedForReview(true);
+      setTimeout(() => setPostedForReview(false), 3000);
+    } finally {
+      setPostingForReview(false);
+    }
+  };
 
   const handleMerge = async () => {
     if (!mr) return;
@@ -273,12 +335,34 @@ export function MRDetailView({
         <span className={styles.mrId}>!{mrIid}</span>
         {mr && (
           <>
+            <AddToFocusButton
+              link={{
+                source: "gitlab",
+                label: mr.title,
+                subtitle: `!${mrIid} · ${mr.author}`,
+                url: mr.web_url,
+                navigateTo: "gitlab",
+                sourceId: String(mrIid),
+                sourceBranch: mr.source_branch,
+              }}
+              title={mr.title}
+            />
+            <CorrelationBadge entityId={`gitlab:${mrIid}`} />
             <button
               className={styles.externalBtn}
               onClick={() => setShowCreateTodo(true)}
               title="Create To-Do"
             >
               <ListPlus size={12} />
+            </button>
+            <button
+              className={`${styles.externalBtn} ${postedForReview ? styles.externalBtnSuccess : ""}`}
+              onClick={handlePostForReview}
+              disabled={postingForReview || postedForReview}
+              title="Post MR for review in Slack"
+            >
+              <Send size={12} />
+              {postedForReview ? "Posted!" : postingForReview ? "..." : ""}
             </button>
             <button className={styles.externalBtn} onClick={() => open(mr.web_url)} title="Open in browser">
               <ExternalLink size={12} />
@@ -368,6 +452,12 @@ export function MRDetailView({
 
           {/* Approvals */}
           <ApprovalView rules={mr.approval_rules} />
+
+          {/* Cross-panel correlations */}
+          <RelatedItems entityId={`gitlab:${mr.iid}`} />
+
+          {/* Changes / Diff */}
+          <ChangesSection projectId={mr.project_id} mrIid={mr.iid} changesCount={mr.changes_count} />
 
           {/* Description */}
           {mr.description && (

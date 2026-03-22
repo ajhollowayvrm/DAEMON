@@ -118,3 +118,31 @@ pub struct ThreadNote {
     pub created_at: String,
     pub system: bool,
 }
+
+// ── MR Diff types ──
+
+#[derive(Debug, Deserialize)]
+pub struct DiffChange {
+    pub old_path: String,
+    pub new_path: String,
+    pub diff: String,
+    #[serde(default)]
+    pub new_file: bool,
+    #[serde(default)]
+    pub renamed_file: bool,
+    #[serde(default)]
+    pub deleted_file: bool,
+}
+
+#[derive(Debug, Serialize)]
+pub struct FileDiff {
+    pub old_path: String,
+    pub new_path: String,
+    pub status: String,
+    pub diff: String,
+}
+
+#[derive(Debug, Serialize)]
+pub struct MRDiff {
+    pub files: Vec<FileDiff>,
+}

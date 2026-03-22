@@ -15,6 +15,7 @@ export interface PersonaConfig {
   allowedTools?: string[];
   deniedTools?: string[];
   maxBudgetUsd?: number;
+  acceptQuips?: string[];
 }
 
 // ── Squad Presets ──

@@ -5,6 +5,7 @@ import {
   ChevronDown,
   ChevronRight,
   Clock,
+  GitCommit,
   RotateCcw,
   Square,
   Trash2,
@@ -90,9 +91,11 @@ function PersonaTimeline({ mission }: { mission: MissionTask }) {
     }
   });
 
-  const isEntryExpanded = (entryId: string, status: PersonaRunStatus) => {
+  const isEntryExpanded = (entryId: string, status: PersonaRunStatus, hasOutput: boolean) => {
     if (entryId in manualOverrides) return manualOverrides[entryId];
     if (isLive && status === "active") return true;
+    // When mission is done, expand entries that have output
+    if (!isLive && hasOutput) return true;
     return false;
   };
 
@@ -130,9 +133,14 @@ function PersonaTimeline({ mission }: { mission: MissionTask }) {
       </div>
       <AnimatePresence initial={false}>
         {entries.map((entry, idx) => {
-          const persona = getPersonaById(entry.personaId);
-          if (!persona) return null;
-          const expanded = isEntryExpanded(entry.id, entry.status);
+          const isCommitStep = entry.personaId === "_commit";
+          const persona = isCommitStep ? null : getPersonaById(entry.personaId);
+          if (!persona && !isCommitStep) return null;
+          const displayName = isCommitStep ? "Commit & Push" : persona!.name;
+          const displayRole = isCommitStep ? "Git" : persona!.role;
+          const displayColor = isCommitStep ? "var(--neon-green)" : persona!.color;
+          const displayModel = isCommitStep ? "haiku" : persona!.model;
+          const expanded = isEntryExpanded(entry.id, entry.status, !!entry.output);
           const isActive = entry.id === activeEntryId;
 
           return (
@@ -153,12 +161,12 @@ function PersonaTimeline({ mission }: { mission: MissionTask }) {
                 <HoverTooltip
                   label={
                     entry.status === "active"
-                      ? `${persona.name} is working...`
+                      ? `${displayName} is working...`
                       : entry.status === "done" && entry.output
                         ? entry.output.replace(/[#*`\n]/g, " ").trim().slice(0, 120) + (entry.output.length > 120 ? "..." : "")
                         : entry.status === "failed"
-                          ? `${persona.name} failed`
-                          : `${persona.name} — waiting`
+                          ? `${displayName} failed`
+                          : `${displayName} — waiting`
                   }
                   color={entry.status === "done" ? "cyan" : entry.status === "failed" ? "magenta" : "yellow"}
                   lineLength={100}
@@ -167,23 +175,24 @@ function PersonaTimeline({ mission }: { mission: MissionTask }) {
                   className={styles.timelineHeader}
                   onClick={() => toggleExpand(entry.id, expanded)}
                 >
+                  {isCommitStep && <GitCommit size={12} style={{ color: displayColor, flexShrink: 0 }} />}
                   <span
                     className={styles.personaName}
-                    style={{ color: persona.color }}
+                    style={{ color: displayColor }}
                   >
-                    {persona.name}
+                    {displayName}
                   </span>
-                  <span className={styles.personaRole}>{persona.role}</span>
+                  <span className={styles.personaRole}>{displayRole}</span>
                   <span
                     className={`${styles.modelBadge} ${
-                      persona.model === "opus"
+                      displayModel === "opus"
                         ? styles.modelOpus
-                        : persona.model === "haiku"
+                        : displayModel === "haiku"
                           ? styles.modelHaiku
                           : styles.modelSonnet
                     }`}
                   >
-                    {persona.model}
+                    {displayModel}
                   </span>
                   {entry.isRetry && (
                     <span className={styles.retryBadge}>
@@ -230,7 +239,7 @@ function PersonaTimeline({ mission }: { mission: MissionTask }) {
                             <span />
                           </div>
                           <span className={styles.thinkingText}>
-                            {persona.name} is working...
+                            {displayName} is working...
                           </span>
                         </div>
                       ) : null}
@@ -522,7 +531,16 @@ interface HistoryEntry {
 function BackgroundResults() {
   const completedUnseen = usePersonaStore((s) => s.completedUnseen);
   const dismissCompletedRun = usePersonaStore((s) => s.dismissCompletedRun);
+  const setActiveConversation = useChatStore((s) => s.setActiveConversation);
+  const conversations = useChatStore((s) => s.conversations);
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+
+  const openConversation = (runId: string) => {
+    if (conversations[runId]) {
+      setActiveConversation(runId);
+      dismissCompletedRun(runId);
+    }
+  };
 
   if (completedUnseen.length === 0) return null;
 
@@ -552,7 +570,11 @@ function BackgroundResults() {
               transition={{ ...springTransition, delay: i * 0.05 }}
               style={{ "--persona-color": persona.color } as React.CSSProperties}
             >
-              <div className={styles.backgroundResultHeader}>
+              <div
+                className={styles.backgroundResultHeader}
+                onClick={() => openConversation(run.id)}
+                style={{ cursor: conversations[run.id] ? "pointer" : undefined }}
+              >
                 {persona.avatar && (
                   <img
                     src={persona.avatar}
@@ -567,15 +589,16 @@ function BackgroundResults() {
                 <span className={styles.personaRole}>{persona.role}</span>
                 <button
                   className={styles.backgroundResultToggle}
-                  onClick={() =>
-                    setExpanded((prev) => ({ ...prev, [run.id]: !prev[run.id] }))
-                  }
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setExpanded((prev) => ({ ...prev, [run.id]: !prev[run.id] }));
+                  }}
                 >
                   {isExpanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
                 </button>
                 <motion.button
                   className={styles.backgroundResultDismiss}
-                  onClick={() => dismissCompletedRun(run.id)}
+                  onClick={(e) => { e.stopPropagation(); dismissCompletedRun(run.id); }}
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
                   title="Dismiss"
@@ -833,16 +856,18 @@ function MissionHistory() {
 // ── Main Component ──
 
 export function MissionControl() {
-  const { squad, activeMission, activeSingleRun } = usePersonaStore(
+  const { squad, activeMission, activeSingleRun, viewingMission } = usePersonaStore(
     useShallow((s) => ({
       squad: s.squad,
       activeMission: s.activeMission,
       activeSingleRun: s.activeSingleRun,
+      viewingMission: s.viewingMission,
     })),
   );
   const conversations = useChatStore((s) => s.conversations);
   const activeConversationId = useChatStore((s) => s.activeConversationId);
   const dismissSingleRun = usePersonaStore((s) => s.dismissSingleRun);
+  const setViewingMission = usePersonaStore((s) => s.setViewingMission);
   const startMission = usePersonaStore((s) => s.startMission);
   const clearSquad = usePersonaStore((s) => s.clearSquad);
   const [taskDescription, setTaskDescription] = useState("");
@@ -873,6 +898,25 @@ export function MissionControl() {
         {chatRunId ? (
           <motion.div key="agent-chat" {...fadeSlideUp} transition={springTransition}>
             <AgentChat conversationId={chatRunId} onBack={handleChatBack} />
+          </motion.div>
+        ) : viewingMission ? (
+          <motion.div key="viewing-mission" {...fadeIn} transition={{ duration: 0.2 }}>
+            <div className={styles.missionControl}>
+              <div className={styles.activeMissionHeader}>
+                <PersonaTimeline mission={viewingMission} />
+                <motion.button
+                  className={styles.backBtn}
+                  onClick={() => setViewingMission(null)}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <ArrowLeft size={14} />
+                  Back
+                </motion.button>
+              </div>
+            </div>
           </motion.div>
         ) : activeSingleRun ? (
           <motion.div key="single-output" {...fadeSlideUp} transition={springTransition}>

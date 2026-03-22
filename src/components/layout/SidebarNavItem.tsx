@@ -1,11 +1,12 @@
 import { type LucideIcon } from "lucide-react";
 import styles from "./SidebarNavItem.module.css";
-import { useTheme } from "../../themes";
 
 interface SidebarNavItemProps {
   icon: LucideIcon;
   label: string;
   badge?: number;
+  /** Optional secondary count shown as a separate chip (e.g. comms alerts) */
+  secondaryBadge?: { count: number; label: string };
   active: boolean;
   collapsed: boolean;
   activity?: { running: boolean; avatar?: string; color?: string };
@@ -16,22 +17,20 @@ export function SidebarNavItem({
   icon: Icon,
   label,
   badge,
+  secondaryBadge,
   active,
   collapsed,
   activity,
   onClick,
 }: SidebarNavItemProps) {
-  const { theme } = useTheme();
-  const isLcars = theme.layoutStyle === "lcars";
-
   return (
     <button
-      className={`${isLcars ? styles.navItemLcars : styles.navItem} ${active ? (isLcars ? styles.navItemLcarsActive : styles.navItemActive) : ""} ${collapsed ? styles.collapsed : ""}`}
+      className={`${styles.navItem} ${active ? styles.navItemActive : ""} ${collapsed ? styles.collapsed : ""}`}
       onClick={onClick}
       title={label}
     >
       <div className={styles.iconWrap}>
-        <Icon size={18} className={isLcars ? styles.iconLcars : styles.icon} />
+        <Icon size={18} className={styles.icon} />
         {activity?.running && (
           <span
             className={styles.activityDot}
@@ -41,7 +40,7 @@ export function SidebarNavItem({
       </div>
       {!collapsed && (
         <>
-          <span className={isLcars ? styles.labelLcars : styles.label}>{label}</span>
+          <span className={styles.label}>{label}</span>
           {activity?.running && activity.avatar && (
             <img
               src={activity.avatar}
@@ -49,13 +48,18 @@ export function SidebarNavItem({
               className={styles.activityAvatar}
             />
           )}
+          {secondaryBadge && secondaryBadge.count > 0 && (
+            <span className={styles.badgeSecondary} title={secondaryBadge.label}>
+              {secondaryBadge.count}
+            </span>
+          )}
           {badge !== undefined && badge > 0 && (
-            <span className={isLcars ? styles.badgeLcars : styles.badge}>{badge}</span>
+            <span className={styles.badge}>{badge}</span>
           )}
         </>
       )}
       {collapsed && badge !== undefined && badge > 0 && (
-        <span className={isLcars ? styles.badgeCollapsedLcars : styles.badgeCollapsed}>{badge}</span>
+        <span className={styles.badgeCollapsed}>{badge}</span>
       )}
     </button>
   );

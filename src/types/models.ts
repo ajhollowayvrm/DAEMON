@@ -12,6 +12,15 @@ export interface SlackMessage {
   latest_reply_ts: string | null;
 }
 
+export interface DmConversation {
+  channel_id: string;
+  user_id: string;
+  user_name: string;
+  last_message: string | null;
+  last_message_ts: string | null;
+  is_unread: boolean;
+}
+
 export interface SlackSection {
   title: string;
   section_type: string;
@@ -107,6 +116,19 @@ export interface MRDetail {
   updated_at: string;
 }
 
+// ── MR Diff ──
+
+export interface FileDiff {
+  old_path: string;
+  new_path: string;
+  status: string;
+  diff: string;
+}
+
+export interface MRDiff {
+  files: FileDiff[];
+}
+
 // ── Linear ──
 
 export interface LinearIssue {
@@ -155,6 +177,22 @@ export interface WorkflowState {
   name: string;
   state_type: string;
   position: number;
+}
+
+// ── Datadog ──
+
+export interface DatadogMonitor {
+  id: number;
+  name: string;
+  /** "OK", "Alert", "Warn", "No Data" */
+  status: string;
+  monitor_type: string;
+  tags: string[];
+  query: string;
+  /** The monitor's notification message — describes what the alert means */
+  message: string;
+  priority: number | null;
+  modified: string | null;
 }
 
 // ── Agents ──

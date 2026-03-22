@@ -1,4 +1,4 @@
-export type ActionSource = "slack" | "gitlab" | "linear";
+export type ActionSource = "slack" | "gitlab" | "linear" | "datadog";
 
 export interface AIAction {
   id: string;
@@ -130,6 +130,33 @@ export const LINEAR_ACTIONS: AIAction[] = [
   },
 ];
 
+export const DATADOG_ACTIONS: AIAction[] = [
+  {
+    id: "investigate-alert",
+    label: "Investigate Alert",
+    command: "",
+    persona: "ritsuko",
+    buildArgs: (ctx) =>
+      `Investigate Datadog monitor alert:\n\nMonitor: ${ctx.monitorName ?? ""}\nID: ${ctx.monitorId ?? ""}\nStatus: ${ctx.status ?? ""}\nQuery: ${ctx.query ?? ""}\nTags: ${ctx.tags ?? ""}\n\nPull recent logs, traces, and metrics to identify the root cause. Provide a clear summary of what's happening and recommend next steps.`,
+  },
+  {
+    id: "audit-monitor",
+    label: "Audit Monitor",
+    command: "",
+    persona: "ritsuko",
+    buildArgs: (ctx) =>
+      `Audit this Datadog monitor and recommend improvements:\n\nMonitor: ${ctx.monitorName ?? ""}\nID: ${ctx.monitorId ?? ""}\nQuery: ${ctx.query ?? ""}\nTags: ${ctx.tags ?? ""}\n\nCheck if thresholds are appropriate, if tags are correct, and if notification channels include #comms_alerts where relevant.`,
+  },
+  {
+    id: "design-monitors",
+    label: "Design Related Monitors",
+    command: "",
+    persona: "ritsuko",
+    buildArgs: (ctx) =>
+      `Based on this existing monitor, identify monitoring gaps for the same service and design additional monitors:\n\nMonitor: ${ctx.monitorName ?? ""}\nQuery: ${ctx.query ?? ""}\nTags: ${ctx.tags ?? ""}\n\nPropose monitors for error rates, latency, throughput, and deliverability as appropriate.`,
+  },
+];
+
 export function getActionsForSource(source: ActionSource): AIAction[] {
   switch (source) {
     case "slack":
@@ -138,5 +165,7 @@ export function getActionsForSource(source: ActionSource): AIAction[] {
       return GITLAB_ACTIONS;
     case "linear":
       return LINEAR_ACTIONS;
+    case "datadog":
+      return DATADOG_ACTIONS;
   }
 }

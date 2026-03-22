@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 use crate::models::slack::{SlackMessage, SlackSection};
-use crate::services::slack::{get_slack_creds, slack_api};
+use crate::services::slack::{get_slack_creds, slack_api, slack_api_post};
 
 struct ChannelDef {
     name: &'static str,
@@ -679,6 +679,159 @@ pub async fn mark_as_read(channel_id: String, ts: String) -> Result<bool, String
 
     let ok = result["ok"].as_bool().unwrap_or(false);
     Ok(ok)
+}
+
+// ── Send Message ─────────────────────────────────────────────
+
+#[tauri::command]
+pub async fn send_slack_message(
+    channel_id: String,
+    text: String,
+    thread_ts: Option<String>,
+) -> Result<SlackMessage, String> {
+    let creds = get_slack_creds()?;
+    let http = reqwest::Client::builder()
+        .build()
+        .map_err(|e| e.to_string())?;
+
+    let mut body = serde_json::json!({
+        "channel": channel_id,
+        "text": text,
+    });
+
+    if let Some(ref ts) = thread_ts {
+        body["thread_ts"] = serde_json::Value::String(ts.clone());
+    }
+
+    let result = slack_api_post(&http, &creds, "chat.postMessage", &body).await?;
+
+    let msg = &result["message"];
+    let ts_str = msg["ts"].as_str().unwrap_or("").to_string();
+
+    Ok(SlackMessage {
+        id: ts_str.clone(),
+        channel: channel_id.clone(),
+        channel_id: channel_id,
+        sender: creds.user_name.clone(),
+        message: text,
+        timestamp: format_relative_time(&ts_str),
+        raw_ts: ts_str,
+        permalink: String::new(),
+        is_unread: false,
+        reply_count: 0,
+        latest_reply_ts: None,
+    })
+}
+
+// ── DM Conversations ─────────────────────────────────────────
+
+#[derive(Debug, serde::Serialize)]
+pub struct DmConversation {
+    pub channel_id: String,
+    pub user_id: String,
+    pub user_name: String,
+    pub last_message: Option<String>,
+    pub last_message_ts: Option<String>,
+    pub is_unread: bool,
+}
+
+#[tauri::command]
+pub async fn get_dm_conversations() -> Result<Vec<DmConversation>, String> {
+    let creds = get_slack_creds()?;
+    let http = reqwest::Client::builder()
+        .build()
+        .map_err(|e| e.to_string())?;
+
+    // Fetch recent IM conversations
+    let data = slack_api(
+        &http,
+        &creds,
+        "conversations.list",
+        &[("types", "im"), ("limit", "20"), ("exclude_archived", "true")],
+    )
+    .await?;
+
+    let channels = data["channels"]
+        .as_array()
+        .ok_or("No channels in response")?;
+
+    let mut user_cache: HashMap<String, String> = HashMap::new();
+    let mut convos = Vec::new();
+
+    for ch in channels {
+        let channel_id = ch["id"].as_str().unwrap_or("").to_string();
+        let user_id = ch["user"].as_str().unwrap_or("").to_string();
+
+        if user_id.is_empty() || user_id == "USLACKBOT" {
+            continue;
+        }
+
+        // Resolve user name
+        let user_name = if let Some(name) = user_cache.get(&user_id) {
+            name.clone()
+        } else {
+            let name = match slack_api(&http, &creds, "users.info", &[("user", &user_id)]).await {
+                Ok(udata) => {
+                    udata["user"]["profile"]["display_name_normalized"]
+                        .as_str()
+                        .filter(|s| !s.is_empty())
+                        .or_else(|| udata["user"]["real_name"].as_str())
+                        .unwrap_or(&user_id)
+                        .to_string()
+                }
+                Err(_) => user_id.clone(),
+            };
+            user_cache.insert(user_id.clone(), name.clone());
+            name
+        };
+
+        // Get last message from conversation
+        let history = slack_api(
+            &http,
+            &creds,
+            "conversations.history",
+            &[("channel", &channel_id), ("limit", "1")],
+        )
+        .await;
+
+        let (last_message, last_message_ts) = if let Ok(ref h) = history {
+            if let Some(msgs) = h["messages"].as_array() {
+                if let Some(m) = msgs.first() {
+                    let text = m["text"].as_str().unwrap_or("").to_string();
+                    let ts = m["ts"].as_str().unwrap_or("").to_string();
+                    (Some(text), Some(ts))
+                } else {
+                    (None, None)
+                }
+            } else {
+                (None, None)
+            }
+        } else {
+            (None, None)
+        };
+
+        // Check unread — compare last_read vs latest
+        let is_unread = ch["is_open"].as_bool().unwrap_or(false)
+            && last_message_ts.as_deref().unwrap_or("") > ch["last_read"].as_str().unwrap_or("999999999999.999999");
+
+        convos.push(DmConversation {
+            channel_id,
+            user_id,
+            user_name,
+            last_message,
+            last_message_ts,
+            is_unread,
+        });
+    }
+
+    // Sort by last message timestamp descending (most recent first)
+    convos.sort_by(|a, b| {
+        let a_ts = a.last_message_ts.as_deref().unwrap_or("");
+        let b_ts = b.last_message_ts.as_deref().unwrap_or("");
+        b_ts.cmp(a_ts)
+    });
+
+    Ok(convos)
 }
 
 fn format_relative_time(ts: &str) -> String {

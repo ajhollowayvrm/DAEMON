@@ -38,6 +38,37 @@
   color: var(--neon-magenta);
 }
 
+/* ── Repo section headers ── */
+
+.repoHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-sm);
+  padding: 6px 0 4px;
+  margin-top: var(--gap-sm);
+  border-bottom: 1px solid rgba(0, 255, 245, 0.08);
+}
+
+.repoHeader:first-child {
+  margin-top: 0;
+}
+
+.repoName {
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--neon-cyan);
+  opacity: 0.7;
+}
+
+.repoCount {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
 /* ── MR cards ── */
 
 .mrItem {

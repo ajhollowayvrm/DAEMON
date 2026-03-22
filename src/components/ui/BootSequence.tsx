@@ -21,20 +21,6 @@ function getBootSettings() {
   return { enabled, duration };
 }
 
-// Generate random stars for LCARS starfield
-function generateStars(count: number) {
-  return Array.from({ length: count }, (_, i) => ({
-    id: i,
-    x: Math.random() * 100,
-    y: Math.random() * 100,
-    size: Math.random() * 2 + 0.5,
-    opacity: Math.random() * 0.6 + 0.2,
-    delay: Math.random() * 3,
-  }));
-}
-
-const STARS = generateStars(120);
-
 // ── Data rain columns for background animation ──
 function generateDataRainColumns(count: number) {
   const chars = "01/\\|-ABCDEFabcdef0123456789><{}[]アイウエオカキクケコ";
@@ -382,7 +368,7 @@ function CyberpunkBoot({
   );
 }
 
-// ── Main BootSequence (delegates to Cyberpunk or LCARS) ──
+// ── Main BootSequence ──
 
 export function BootSequence({ forcePlay = false }: { forcePlay?: boolean }) {
   const { theme } = useTheme();
@@ -394,9 +380,6 @@ export function BootSequence({ forcePlay = false }: { forcePlay?: boolean }) {
     [theme.bootSequence.lines, duration],
   );
   const [phase, setPhase] = useState<Phase>(shouldPlay ? "text" : "done");
-  const [visibleLines, setVisibleLines] = useState(0);
-
-  const isLcars = theme.layoutStyle === "lcars";
 
   // Signal booting state to layoutStore
   useEffect(() => {
@@ -407,147 +390,15 @@ export function BootSequence({ forcePlay = false }: { forcePlay?: boolean }) {
     }
   }, [phase, setBooting]);
 
-  // ── LCARS uses the original setTimeout chain ──
-  const lineTime = (duration * 1000) * 0.65;
-  const holdTime = (duration * 1000) * 0.15;
-  const delayPerLine = lineTime / bootLines.length;
-
-  useEffect(() => {
-    if (!shouldPlay || !isLcars) return;
-
-    const lineTimers = bootLines.map((_, idx) =>
-      setTimeout(() => setVisibleLines(idx + 1), idx * delayPerLine),
-    );
-    const totalLineTime = bootLines.length * delayPerLine;
-
-    const clearTimer = setTimeout(() => setPhase("postText"), totalLineTime + holdTime);
-    const revealTimer = setTimeout(() => setPhase("reveal"), totalLineTime + holdTime + 2400);
-    const doneTimer = setTimeout(() => setPhase("done"), totalLineTime + holdTime + 2400 + 800);
-
-    return () => {
-      lineTimers.forEach(clearTimeout);
-      clearTimeout(clearTimer);
-      clearTimeout(revealTimer);
-      clearTimeout(doneTimer);
-    };
-  }, [shouldPlay, isLcars, delayPerLine, holdTime, bootLines]);
-
-  if (phase === "done" && !isLcars) return null;
-
-  // ─── Cyberpunk Boot (Framer Motion) ───
-  if (!isLcars) {
-    if (!shouldPlay) return null;
-    return (
-      <CyberpunkBoot
-        bootLines={bootLines}
-        logoPath={theme.bootSequence.logoPath}
-        duration={duration}
-        onDone={() => setPhase("done")}
-      />
-    );
-  }
-
-  // ─── LCARS Boot (unchanged) ───
   if (phase === "done") return null;
-
-  const showAssembly = phase === "postText" || phase === "reveal";
+  if (!shouldPlay) return null;
 
   return (
-    <div className={`${styles.lcarsBootOverlay} ${phase === "reveal" ? styles.overlayFadeOut : ""}`}>
-      <div className={styles.starfield}>
-        {STARS.map((star) => (
-          <div
-            key={star.id}
-            className={styles.star}
-            style={{
-              left: `${star.x}%`,
-              top: `${star.y}%`,
-              width: `${star.size}px`,
-              height: `${star.size}px`,
-              opacity: star.opacity * 0.5,
-              animationDelay: `${star.delay}s`,
-            }}
-          />
-        ))}
-      </div>
-
-      <div className={`${styles.lcarsBootFrame} ${phase !== "text" ? styles.lcarsBootFrameFade : ""}`}>
-        <div className={styles.lcarsBootSidebar}>
-          <div className={styles.lcarsBootElbow} />
-          <div className={styles.lcarsBootSidebarBar} />
-          <div className={styles.lcarsBootSidebarPill} />
-        </div>
-        <div className={styles.lcarsBootContent}>
-          <div className={styles.lcarsBootHeader}>
-            <span className={styles.lcarsBootHeaderLabel}>LCARS BOOT SEQUENCE</span>
-            <span className={styles.lcarsBootHeaderAccent} />
-          </div>
-          <div className={styles.lcarsBootLines}>
-            {bootLines.slice(0, visibleLines).map((text, idx) => (
-              <div
-                key={idx}
-                className={`${styles.lcarsBootLine} ${
-                  text.includes("READY") || text.includes("ONLINE") ? styles.lcarsBootLineReady : ""
-                } ${
-                  text.includes("ERROR") || text.includes("DENIED") || text.includes("FAILED")
-                    ? styles.lcarsBootLineWarn
-                    : ""
-                } ${text === "" ? styles.bootLineSpacer : ""}`}
-              >
-                {text}
-              </div>
-            ))}
-            {phase === "text" && visibleLines < bootLines.length && (
-              <span className={styles.lcarsBootCursor}>▌</span>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {showAssembly && (
-        <div className={styles.lcarsAssembly}>
-          <div className={styles.assembleTopBar}>
-            <div className={styles.assembleSegment} style={{ background: "#ff9933", flex: "0 0 44px", borderRadius: "0 0 0 22px" }} />
-            <div className={styles.assembleSegment} style={{ background: "#cc6699", flex: "0 0 80px" }} />
-            <div className={styles.assembleSegment} style={{ background: "#9966cc", flex: "0 0 40px" }} />
-            <div className={styles.assembleSegment} style={{ background: "#9999ff", flex: "1 1 auto" }} />
-            <div className={styles.assembleSegment} style={{ background: "#cc6699", flex: "0 0 60px" }} />
-            <div className={styles.assembleSegment} style={{ background: "#ff9933", flex: "0 0 30px", borderRadius: "0 16px 16px 0" }} />
-          </div>
-          <div className={styles.assembleLeftBar}>
-            <div className={styles.assembleSegment} style={{ background: "#ff9933", flex: "1 1 auto" }} />
-            <div className={styles.assembleSegment} style={{ background: "#cc6699", flex: "0 0 60px" }} />
-            <div className={styles.assembleSegment} style={{ background: "#9999ff", flex: "0 0 30px" }} />
-            <div className={styles.assembleSegment} style={{ background: "#9966cc", flex: "0 0 20px", borderRadius: "0 0 0 12px" }} />
-          </div>
-          <div className={styles.assembleRightBar}>
-            <div className={styles.assembleSegment} style={{ background: "#9966cc", flex: "0 0 20px", borderRadius: "0 12px 0 0" }} />
-            <div className={styles.assembleSegment} style={{ background: "#9999ff", flex: "0 0 40px" }} />
-            <div className={styles.assembleSegment} style={{ background: "#cc6699", flex: "0 0 80px" }} />
-            <div className={styles.assembleSegment} style={{ background: "#ff9933", flex: "1 1 auto" }} />
-          </div>
-          <div className={styles.assembleBottomBar}>
-            <div className={styles.assembleSegment} style={{ background: "#9966cc", flex: "0 0 30px", borderRadius: "16px 0 0 0" }} />
-            <div className={styles.assembleSegment} style={{ background: "#ff9933", flex: "0 0 100px" }} />
-            <div className={styles.assembleSegment} style={{ background: "#9999ff", flex: "1 1 auto" }} />
-            <div className={styles.assembleSegment} style={{ background: "#cc6699", flex: "0 0 50px" }} />
-            <div className={styles.assembleSegment} style={{ background: "#9966cc", flex: "0 0 44px", borderRadius: "0 0 22px 0" }} />
-          </div>
-          <div className={styles.assembleInnerH}>
-            <div className={styles.assembleSegment} style={{ background: "#9999ff", flex: "0 0 120px" }} />
-            <div className={styles.assembleSegment} style={{ background: "#cc6699", flex: "1 1 auto" }} />
-            <div className={styles.assembleSegment} style={{ background: "#ff9933", flex: "0 0 80px" }} />
-          </div>
-          <div className={styles.assembleInnerV}>
-            <div className={styles.assembleSegment} style={{ background: "#cc6699", flex: "0 0 60px" }} />
-            <div className={styles.assembleSegment} style={{ background: "#ff9933", flex: "1 1 auto" }} />
-          </div>
-          <div className={styles.assembleCenter}>
-            <span className={styles.assembleCenterText}>LCARS INTERFACE ACTIVE</span>
-            <span className={styles.assembleCenterSub}>DISTRIBUTED AUTONOMOUS ENGINEERING MANAGEMENT ORCHESTRATION NODE</span>
-          </div>
-        </div>
-      )}
-    </div>
+    <CyberpunkBoot
+      bootLines={bootLines}
+      logoPath={theme.bootSequence.logoPath}
+      duration={duration}
+      onDone={() => setPhase("done")}
+    />
   );
 }

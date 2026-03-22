@@ -1,0 +1,176 @@
+/* ── Diff Viewer ── */
+
+.viewer {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 10px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-muted);
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+
+.fileCount {
+  color: var(--text-secondary);
+}
+
+.additions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  color: var(--neon-green);
+}
+
+.deletions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  color: var(--neon-red, #ff3366);
+}
+
+/* ── File list ── */
+
+.fileList {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.file {
+  border: 1px solid rgba(255,255,255,0.04);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.fileHeader {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 6px 10px;
+  background: var(--bg-raised);
+  border: none;
+  cursor: pointer;
+  transition: background 0.12s;
+  text-align: left;
+}
+
+.fileHeader:hover {
+  background: var(--bg-hover);
+}
+
+.fileChevron {
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.filePath {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-primary);
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fileStats {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: 10px;
+}
+
+/* ── Diff body ── */
+
+.diffBody {
+  overflow-x: auto;
+  background: rgba(0,0,0,0.2);
+}
+
+.diffTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.diffLine {
+  transition: background 0.1s;
+}
+
+.diffLine:hover {
+  background: rgba(255,255,255,0.02) !important;
+}
+
+/* Line types */
+.line_context {
+  background: transparent;
+}
+
+.line_add {
+  background: rgba(57,255,20,0.06);
+}
+
+.line_remove {
+  background: rgba(255,51,102,0.06);
+}
+
+.line_hunk {
+  background: rgba(176,38,255,0.06);
+}
+
+/* Columns */
+.lineNum {
+  width: 40px;
+  min-width: 40px;
+  padding: 0 6px;
+  text-align: right;
+  color: var(--text-muted);
+  opacity: 0.35;
+  user-select: none;
+  border-right: 1px solid rgba(255,255,255,0.04);
+  font-size: 10px;
+  vertical-align: top;
+}
+
+.lineSign {
+  width: 16px;
+  min-width: 16px;
+  padding: 0 2px;
+  text-align: center;
+  user-select: none;
+  vertical-align: top;
+}
+
+.line_add .lineSign { color: var(--neon-green); }
+.line_remove .lineSign { color: var(--neon-red, #ff3366); }
+.line_hunk .lineSign { color: var(--neon-purple); font-size: 9px; }
+
+.lineContent {
+  padding: 0 8px;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.lineContent code {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-primary);
+}
+
+.line_add .lineContent code { color: var(--neon-green); }
+.line_remove .lineContent code { color: var(--neon-red, #ff3366); opacity: 0.7; }
+.line_hunk .lineContent code { color: var(--neon-purple); font-size: 10px; opacity: 0.6; }

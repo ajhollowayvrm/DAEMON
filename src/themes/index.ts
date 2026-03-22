@@ -1,14 +1,12 @@
 import type { ThemeDefinition } from "./types";
 import { cyberpunkTheme } from "./cyberpunk";
 import { trekTosTheme } from "./trek-tos";
-import { trekTngTheme } from "./trek-tng";
 
 // ── Theme registry ──
 
 const themes: Record<string, ThemeDefinition> = {
   [cyberpunkTheme.id]: cyberpunkTheme,
   [trekTosTheme.id]: trekTosTheme,
-  [trekTngTheme.id]: trekTngTheme,
 };
 
 /** All registered theme IDs */

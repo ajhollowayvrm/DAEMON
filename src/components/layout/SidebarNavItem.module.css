@@ -118,6 +118,18 @@
   flex-shrink: 0;
 }
 
+.badgeSecondary {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  padding: 1px 7px;
+  border-radius: 8px;
+  background: rgba(0, 255, 245, 0.08);
+  color: var(--neon-cyan);
+  border: 1px solid rgba(0, 255, 245, 0.25);
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
 /* ── Collapsed state ── */
 
 .collapsed {
@@ -143,83 +155,3 @@
   font-weight: 700;
 }
 
-/* ═══════════════════════════════════════════════════════════════════
-   LCARS Nav Item — flat colored pills on black
-   ═══════════════════════════════════════════════════════════════════ */
-
-.navItemLcars {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
-  padding: 8px 14px;
-  background: rgba(255, 153, 51, 0.15);
-  border: none;
-  border-radius: 0 12px 12px 0;
-  color: var(--text-muted);
-  font-family: var(--font-display);
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  cursor: pointer;
-  transition: background 0.15s, color 0.15s;
-  text-align: left;
-  position: relative;
-}
-
-.navItemLcars:hover {
-  background: rgba(255, 153, 51, 0.3);
-  color: #ff9933;
-}
-
-.navItemLcarsActive {
-  background: #ff9933;
-  color: #000000;
-}
-
-.navItemLcarsActive:hover {
-  background: #ffaa55;
-  color: #000000;
-}
-
-.iconLcars {
-  flex-shrink: 0;
-  filter: none;
-}
-
-.labelLcars {
-  flex: 1;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.badgeLcars {
-  font-family: var(--font-display);
-  font-size: 10px;
-  padding: 1px 8px;
-  border-radius: 8px;
-  background: rgba(0, 0, 0, 0.3);
-  color: #000000;
-  font-weight: 700;
-  flex-shrink: 0;
-}
-
-.badgeCollapsedLcars {
-  position: absolute;
-  top: 2px;
-  right: 2px;
-  font-family: var(--font-display);
-  font-size: 8px;
-  min-width: 14px;
-  height: 14px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 3px;
-  border-radius: 7px;
-  background: #cc3333;
-  color: #ffffff;
-  font-weight: 700;
-}

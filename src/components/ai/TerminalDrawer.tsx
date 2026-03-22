@@ -4,7 +4,6 @@ import { listen } from "@tauri-apps/api/event";
 import Markdown from "react-markdown";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAgentStore } from "../../stores/agentStore";
-import { useTheme } from "../../themes";
 import styles from "./TerminalDrawer.module.css";
 
 interface AgentOutputEvent {
@@ -14,8 +13,6 @@ interface AgentOutputEvent {
 }
 
 function DrawerContent() {
-  const { theme } = useTheme();
-  const isLcars = theme.layoutStyle === "lcars";
   const { tasks, activeTaskId, closeTerminalDrawer } = useAgentStore();
   const outputRef = useRef<HTMLDivElement>(null);
 
@@ -35,14 +32,14 @@ function DrawerContent() {
 
   return (
     <motion.div
-      className={isLcars ? styles.drawerLcars : styles.drawer}
+      className={styles.drawer}
       initial={{ y: "100%" }}
       animate={{ y: 0 }}
       exit={{ y: "105%" }}
       transition={{ type: "spring", stiffness: 420, damping: 36, mass: 0.9 }}
     >
       {/* Header bar */}
-      <div className={isLcars ? styles.headerLcars : styles.header}>
+      <div className={styles.header}>
         {/* Left: running indicator + command label — slide in from left */}
         <motion.div
           className={styles.headerInfo}
@@ -52,9 +49,7 @@ function DrawerContent() {
         >
           {isRunning && <span className={styles.runningDot} />}
           <span
-            className={
-              isLcars ? styles.commandLabelLcars : styles.commandLabel
-            }
+            className={styles.commandLabel}
           >
             {activeTask.command || "Research"} {activeTask.args.slice(0, 60)}
             {activeTask.args.length > 60 ? "..." : ""}
@@ -89,7 +84,7 @@ function DrawerContent() {
 
           {/* Close button */}
           <motion.button
-            className={isLcars ? styles.closeBtnLcars : styles.closeBtn}
+            className={styles.closeBtn}
             onClick={closeTerminalDrawer}
             title="Close terminal"
             initial={{ opacity: 0, x: 12 }}
@@ -115,7 +110,7 @@ function DrawerContent() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3, delay: 0.22 }}
       >
-        <div className={isLcars ? styles.markdownLcars : styles.markdown}>
+        <div className={styles.markdown}>
           <Markdown>{activeTask.output.join("\n")}</Markdown>
         </div>
       </motion.div>

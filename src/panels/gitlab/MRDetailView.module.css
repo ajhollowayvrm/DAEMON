@@ -56,6 +56,12 @@
 
 .externalBtn:hover { color: var(--neon-cyan); }
 
+.externalBtnSuccess {
+  color: var(--neon-green) !important;
+  border-color: rgba(57,255,20,0.3);
+  background: rgba(57,255,20,0.06);
+}
+
 .content {
   flex: 1;
   overflow-y: auto;
@@ -585,4 +591,69 @@
 
 .commentSection button {
   align-self: flex-end;
+}
+
+/* ── Changes / Diff Section ── */
+
+.changesSection {
+  border: 1px solid rgba(0,255,245,0.1);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.changesSectionHeader {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 8px 12px;
+  background: rgba(0,255,245,0.04);
+  border: none;
+  cursor: pointer;
+  transition: background 0.12s;
+  text-align: left;
+  color: var(--neon-cyan);
+}
+
+.changesSectionHeader:hover {
+  background: rgba(0,255,245,0.08);
+}
+
+.changesChevron {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.changesBody {
+  border-top: 1px solid rgba(0,255,245,0.08);
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.changesLoading {
+  padding: 16px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--neon-cyan);
+  text-align: center;
+  opacity: 0.6;
+}
+
+.changesError {
+  padding: 12px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--neon-red, #ff3366);
+  text-align: center;
+}
+
+.retryLink {
+  background: none;
+  border: none;
+  color: var(--neon-cyan);
+  cursor: pointer;
+  text-decoration: underline;
+  font-family: inherit;
+  font-size: inherit;
 }

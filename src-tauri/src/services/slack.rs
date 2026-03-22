@@ -81,3 +81,35 @@ pub async fn slack_api(
 
     Ok(data)
 }
+
+/// POST to Slack API (for sending messages, etc.)
+pub async fn slack_api_post(
+    http: &reqwest::Client,
+    creds: &SlackCreds,
+    method: &str,
+    body: &serde_json::Value,
+) -> Result<serde_json::Value, String> {
+    let url = format!("https://slack.com/api/{}", method);
+    let resp = http
+        .post(&url)
+        .header("Authorization", format!("Bearer {}", creds.token))
+        .header("Cookie", format!("d={}", creds.cookie))
+        .json(body)
+        .send()
+        .await
+        .map_err(|e| format!("Slack API error: {}", e))?;
+
+    let data: serde_json::Value = resp
+        .json()
+        .await
+        .map_err(|e| format!("Slack API parse error: {}", e))?;
+
+    if !data["ok"].as_bool().unwrap_or(false) {
+        return Err(format!(
+            "Slack API error: {}",
+            data["error"].as_str().unwrap_or("unknown")
+        ));
+    }
+
+    Ok(data)
+}

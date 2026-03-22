@@ -2,7 +2,7 @@ mod commands;
 mod models;
 mod services;
 
-use commands::{agent, gitlab, linear, settings, slack};
+use commands::{agent, datadog, gitlab, linear, settings, slack};
 use tauri::menu::{MenuBuilder, MenuItemBuilder, SubmenuBuilder};
 use tauri::Emitter;
 
@@ -22,6 +22,12 @@ pub fn run() {
     }
     if let Ok(key) = std::env::var("LINEAR_API_KEY") {
         let _ = services::credentials::store_credential("linear_api_key", &key);
+    }
+    if let Ok(key) = std::env::var("DD_API_KEY") {
+        let _ = services::credentials::store_credential("dd_api_key", &key);
+    }
+    if let Ok(key) = std::env::var("DD_APP_KEY") {
+        let _ = services::credentials::store_credential("dd_app_key", &key);
     }
 
     tauri::Builder::default()
@@ -75,6 +81,8 @@ pub fn run() {
             slack::get_slack_sections,
             slack::get_thread_replies,
             slack::mark_as_read,
+            slack::send_slack_message,
+            slack::get_dm_conversations,
             gitlab::get_merge_requests,
             gitlab::save_gitlab_token,
             gitlab::check_gitlab_connection,
@@ -83,6 +91,7 @@ pub fn run() {
             gitlab::add_mr_note,
             gitlab::play_job,
             gitlab::retry_job,
+            gitlab::get_mr_diff,
             linear::get_issues,
             linear::get_issue_detail,
             linear::add_linear_comment,
@@ -100,6 +109,7 @@ pub fn run() {
             settings::test_gitlab_connection,
             settings::test_linear_connection,
             settings::test_launchdarkly_connection,
+            datadog::get_datadog_monitors,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

@@ -64,6 +64,8 @@ interface PersonaState {
   unseenCompletions: number;
   completedUnseen: SingleAgentRun[];
   pendingQuestions: AgentQuestion[];
+  viewingMission: MissionTask | null;
+  lastCompletedMission: MissionTask | null;
 
   // Squad management
   addToSquad: (personaId: string) => void;
@@ -82,7 +84,8 @@ interface PersonaState {
   dismissSingleRun: () => void;
 
   // Background agent (runs without blocking the picker)
-  launchAgent: (personaId: string, prompt: string) => void;
+  launchAgent: (personaId: string, prompt: string) => string | undefined;
+  cancelBackgroundAgent: (taskId: string) => void;
 
   // Notifications
   clearUnseenCompletions: () => void;
@@ -91,6 +94,10 @@ interface PersonaState {
   // Questions
   answerQuestion: (questionId: string, response: string) => void;
   dismissQuestion: (questionId: string) => void;
+
+  // Viewing completed mission timeline
+  setViewingMission: (mission: MissionTask | null) => void;
+  dismissLastCompletedMission: () => void;
 
   // History
   clearHistory: () => void;
@@ -108,6 +115,8 @@ export const usePersonaStore = create<PersonaState>()(
       completedUnseen: [],
       singleRunHistory: [],
       pendingQuestions: [],
+      viewingMission: null,
+      lastCompletedMission: null,
 
       addToSquad: (personaId) =>
         set((s) => {
@@ -289,9 +298,9 @@ export const usePersonaStore = create<PersonaState>()(
           pendingQuestions: s.pendingQuestions.filter((q) => q.id !== questionId),
         })),
 
-      launchAgent: (personaId: string, prompt: string) => {
+      launchAgent: (personaId: string, prompt: string): string | undefined => {
         const persona = getPersonaById(personaId);
-        if (!persona) return;
+        if (!persona) return undefined;
 
         const run: SingleAgentRun = {
           id: genId("bg"),
@@ -304,7 +313,30 @@ export const usePersonaStore = create<PersonaState>()(
 
         set((s) => ({ backgroundRuns: [...s.backgroundRuns, run] }));
         runBackgroundAgent(run);
+        return run.id;
       },
+
+      cancelBackgroundAgent: (taskId: string) => {
+        invoke("kill_agent_command", { taskId }).catch(() => {});
+        useChatStore.getState().markFailed(taskId);
+        useAgentStore.getState().completeTask(taskId, "failed");
+        set((s) => {
+          const run = s.backgroundRuns.find((r) => r.id === taskId);
+          if (!run) return s;
+          const cancelled: SingleAgentRun = {
+            ...run,
+            status: "failed",
+            completedAt: new Date().toISOString(),
+          };
+          return {
+            backgroundRuns: s.backgroundRuns.filter((r) => r.id !== taskId),
+            singleRunHistory: [cancelled, ...s.singleRunHistory].slice(0, MAX_HISTORY),
+          };
+        });
+      },
+
+      setViewingMission: (mission) => set({ viewingMission: mission }),
+      dismissLastCompletedMission: () => set({ lastCompletedMission: null }),
 
       clearHistory: () => set({ missionHistory: [], singleRunHistory: [] }),
     }),
@@ -452,7 +484,9 @@ async function runSingleAgent(run: SingleAgentRun) {
   if (status === "failed") {
     useChatStore.getState().markFailed(run.id);
   } else {
-    useChatStore.getState().markCompleted(run.id);
+    // Use finalizeAgentTurn so the conversation stays in "waiting" state,
+    // allowing follow-up messages via --resume
+    useChatStore.getState().finalizeAgentTurn(run.id);
   }
 
   const completedRun: SingleAgentRun = {
@@ -529,7 +563,7 @@ async function runBackgroundAgent(run: SingleAgentRun) {
   if (status === "failed") {
     useChatStore.getState().markFailed(run.id);
   } else {
-    useChatStore.getState().markCompleted(run.id);
+    useChatStore.getState().finalizeAgentTurn(run.id);
   }
 
   const completedRun: SingleAgentRun = {
@@ -571,7 +605,11 @@ async function runPersonaChain(mission: MissionTask, description: string) {
     const taskId = `${mission.id}-${personaId}-${Date.now()}`;
     let prompt = `## Task\n${description}`;
     if (previousOutput) {
-      prompt += `\n\n## Previous Agent Output\n${previousOutput}`;
+      // Truncate to last 8000 chars to avoid blowing context/budget for downstream agents
+      const truncated = previousOutput.length > 8000
+        ? `...(truncated)\n${previousOutput.slice(-8000)}`
+        : previousOutput;
+      prompt += `\n\n## Previous Agent Output\n${truncated}`;
     }
 
     // Run the agent and collect output
@@ -672,7 +710,7 @@ async function runPersonaChain(mission: MissionTask, description: string) {
     }
   }
 
-  // ── Mission Complete ──
+  // ── Mission Complete — determine verdict ──
   const finalMission = usePersonaStore.getState().activeMission;
   if (!finalMission) return; // was cancelled
 
@@ -681,6 +719,26 @@ async function runPersonaChain(mission: MissionTask, description: string) {
     .pop();
   const verdict = lastQAEntry ? parseQAVerdict(lastQAEntry.output) : "pass";
 
+  // ── Commit & Push (only if verdict is not "fail") ──
+  const hasCoder = personas.some((id) => CODER_PERSONA_IDS.has(id));
+  if (hasCoder && verdict !== "fail" && !isMissionCancelled()) {
+    const commitEntryId = "_commit";
+    addTimelineEntry({
+      id: commitEntryId,
+      personaId: "_commit",
+      status: "active",
+      output: "",
+      isRetry: false,
+    });
+
+    const commitTaskId = `${mission.id}-commit-${Date.now()}`;
+    const commitResult = await runCommitStep(commitTaskId, description, previousOutput, commitEntryId);
+    if (!isMissionCancelled()) {
+      updateTimelineEntry(commitEntryId, commitResult.failed ? "failed" : "done", commitResult.output);
+    }
+  }
+
+  // ── Finalize ──
   usePersonaStore.setState((s) => {
     const completed = s.activeMission
       ? {
@@ -692,6 +750,7 @@ async function runPersonaChain(mission: MissionTask, description: string) {
       : null;
     return {
       activeMission: null,
+      lastCompletedMission: completed,
       missionHistory: completed
         ? [completed, ...s.missionHistory].slice(0, MAX_HISTORY)
         : s.missionHistory,
@@ -720,14 +779,16 @@ async function runPersonaAgent(
   }, { suppressDrawer: true });
 
   // Await listener registration before invoking to avoid missing early events
+  console.log(`[mission] runPersonaAgent listener registered for taskId=${taskId}, entryId=${entryId}`);
   const unlisten = await listen<AgentOutput>("agent-output", (event) => {
-    if (event.payload.task_id === taskId) {
-      output += event.payload.line + "\n";
-      updateTimelineEntry(entryId, "active", output);
-    }
+    if (event.payload.task_id !== taskId) return;
+    if (event.payload.done) return;
+    output += event.payload.line + "\n";
+    updateTimelineEntry(entryId, "active", output);
   });
 
   try {
+    console.log(`[mission] invoking run_agent_command for ${persona.name}`);
     await invoke("run_agent_command", {
       taskId,
       command: "",
@@ -747,6 +808,7 @@ async function runPersonaAgent(
   }
 
   unlisten();
+  console.log(`[mission] ${persona.name} done. output length=${output.length}, failed=${failed}`);
   useAgentStore.getState().completeTask(taskId, failed ? "failed" : "completed");
   return output;
 }
@@ -796,4 +858,66 @@ function addTimelineEntry(entry: TimelineEntry) {
       },
     };
   });
+}
+
+const COMMIT_SYSTEM_PROMPT = `You are a commit-and-push automation agent. Your only job is to commit changed files and push them to the remote branch.
+
+## Rules
+- Run \`git status\` first to see what changed.
+- If there are no changes to commit, say "No changes to commit" and stop.
+- Stage ONLY files relevant to the task. Never stage .env, credentials, or unrelated files.
+- Write a conventional commit message: \`type(scope): description\` based on the task description and changes.
+- End the commit message body with: Co-Authored-By: Daemon Mission <noreply@daemon.app>
+- Push to the current branch (never force-push, never push to main/master).
+- If the push fails, report the error. Do NOT retry.
+- Output a brief summary of what was committed and pushed.`;
+
+async function runCommitStep(
+  taskId: string,
+  description: string,
+  previousOutput: string,
+  entryId: string,
+): Promise<{ output: string; failed: boolean }> {
+  let output = "";
+  let failed = false;
+
+  useAgentStore.getState().addTask({
+    id: taskId,
+    command: "[Commit & Push]",
+    args: "Committing mission changes",
+    output: [],
+    status: "running",
+  }, { suppressDrawer: true });
+
+  const unlisten = await listen<AgentOutput>("agent-output", (event) => {
+    if (event.payload.task_id !== taskId) return;
+    if (event.payload.done) return;
+    output += event.payload.line + "\n";
+    updateTimelineEntry(entryId, "active", output);
+  });
+
+  const prompt = `## Task\nCommit and push the code changes from this mission.\n\n## Mission Description\n${description}\n\n## What Was Done\n${previousOutput.slice(-3000)}`;
+
+  try {
+    await invoke("run_agent_command", {
+      taskId,
+      command: "",
+      args: prompt,
+      options: {
+        model: "haiku",
+        systemPrompt: COMMIT_SYSTEM_PROMPT,
+        allowedTools: ["Bash", "Read", "Glob", "Grep"],
+        deniedTools: ["Edit", "Write", "NotebookEdit"],
+        maxBudgetUsd: 0.25,
+        disableSlashCommands: true,
+      },
+    });
+  } catch (e) {
+    output += `\nError: ${e}`;
+    failed = true;
+  }
+
+  unlisten();
+  useAgentStore.getState().completeTask(taskId, failed ? "failed" : "completed");
+  return { output, failed };
 }

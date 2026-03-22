@@ -142,7 +142,7 @@ export interface ThemeCSSVariables {
 
 // ── Layout style ──
 
-export type LayoutStyle = "cyberpunk" | "lcars" | "trek-tos";
+export type LayoutStyle = "cyberpunk" | "trek-tos";
 
 // ── Full theme definition ──
 

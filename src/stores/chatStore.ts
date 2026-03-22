@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { invoke } from "@tauri-apps/api/core";
+import { listen } from "@tauri-apps/api/event";
 
 // ── Types ──
 
@@ -143,12 +144,51 @@ export const useChatStore = create<ChatState>()((set, get) => ({
       },
     }));
 
-    // Send to the interactive agent PTY
-    invoke("respond_to_agent", {
-      taskId,
-      questionId: null,
-      response: content,
-    }).catch(() => {});
+    // Set up a listener for the --resume response, then invoke.
+    // The listener handles both streaming chunks and the done signal.
+    // respond_to_agent blocks until the process completes, so both
+    // the done event and the invoke resolution signal completion —
+    // we use whichever fires first via a cleanup guard.
+    let cleaned = false;
+    let unlistenFn: (() => void) | null = null;
+
+    const cleanup = (failed: boolean) => {
+      if (cleaned) return;
+      cleaned = true;
+      unlistenFn?.();
+      if (failed) {
+        useChatStore.getState().markFailed(taskId);
+      } else {
+        useChatStore.getState().finalizeAgentTurn(taskId);
+      }
+    };
+
+    listen<{ task_id: string; line: string; done: boolean }>(
+      "agent-output",
+      (event) => {
+        if (event.payload.task_id !== taskId) return;
+        if (event.payload.done) {
+          cleanup(false);
+          return;
+        }
+        useChatStore.getState().appendAgentChunk(taskId, event.payload.line);
+      },
+    ).then((unlisten) => {
+      unlistenFn = unlisten;
+      invoke("respond_to_agent", {
+        taskId,
+        questionId: null,
+        response: content,
+      })
+        .then(() => cleanup(false))
+        .catch((err) => {
+          console.error("respond_to_agent failed:", err);
+          cleanup(true);
+        });
+    }).catch((err) => {
+      console.error("Failed to set up agent-output listener:", err);
+      useChatStore.getState().markFailed(taskId);
+    });
   },
 
   markCompleted: (taskId) => {

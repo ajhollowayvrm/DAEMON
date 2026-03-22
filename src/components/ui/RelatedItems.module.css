@@ -1,0 +1,180 @@
+/* ── Related Items Section ── */
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-display);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  padding-bottom: 4px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  cursor: pointer;
+  user-select: none;
+}
+
+.header:hover {
+  color: var(--neon-cyan);
+}
+
+.headerIcon {
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.count {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  color: var(--text-muted);
+  opacity: 0.5;
+  margin-left: auto;
+}
+
+.chevron {
+  color: var(--text-muted);
+  transition: transform 0.15s;
+  flex-shrink: 0;
+}
+
+.chevronOpen {
+  transform: rotate(90deg);
+}
+
+/* ── Related Item Row ── */
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-top: 4px;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 8px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background 0.12s;
+}
+
+.item:hover {
+  background: rgba(176, 38, 255, 0.06);
+}
+
+.itemIcon {
+  flex-shrink: 0;
+  color: var(--text-muted);
+}
+
+.itemContent {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.itemLabel {
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.itemSubtitle {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Source group labels ── */
+
+.sourceGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* ── Correlation Badge (toolbar) ── */
+
+.badge {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 7px;
+  border-radius: 10px;
+  background: rgba(176, 38, 255, 0.06);
+  border: 1px solid rgba(176, 38, 255, 0.15);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.badge:hover {
+  border-color: var(--neon-cyan);
+  color: var(--neon-cyan);
+  background: rgba(0, 255, 245, 0.06);
+}
+
+.badgeIcon {
+  flex-shrink: 0;
+}
+
+/* ── Badge Popup — drops downward to avoid overflow clipping ── */
+
+.popup {
+  position: fixed;
+  width: 280px;
+  max-height: 320px;
+  overflow-y: auto;
+  padding: var(--gap-sm) var(--gap-md);
+  background: var(--bg-raised);
+  border: 1px solid rgba(176, 38, 255, 0.2);
+  border-radius: var(--radius-md);
+  box-shadow:
+    0 4px 20px rgba(0, 0, 0, 0.6),
+    0 0 12px rgba(176, 38, 255, 0.08);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-4px);
+  transition: opacity 0.2s, transform 0.2s;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.popupVisible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+.popupTitle {
+  font-family: var(--font-display);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  padding-bottom: 4px;
+  border-bottom: 1px solid rgba(176, 38, 255, 0.1);
+}

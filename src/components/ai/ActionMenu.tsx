@@ -7,7 +7,6 @@ import { useAgentStore } from "../../stores/agentStore";
 import { usePersonaStore } from "../../stores/personaStore";
 import { type AIAction, getActionsForSource, type ActionSource } from "../../config/aiActions";
 import { getPersonaById } from "../../config/personas";
-import { useTheme } from "../../themes";
 import styles from "./ActionMenu.module.css";
 
 // ── Framer Motion variants ─────────────────────────────────────
@@ -65,8 +64,6 @@ interface ActionMenuProps {
 }
 
 export function ActionMenu({ source, context, compact }: ActionMenuProps) {
-  const { theme } = useTheme();
-  const isLcars = theme.layoutStyle === "lcars";
   const [open, setOpen] = useState(false);
   const [dropdownPos, setDropdownPos] = useState({ top: 0, right: 0 });
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -146,10 +143,10 @@ export function ActionMenu({ source, context, compact }: ActionMenuProps) {
     <div className={styles.wrapper} onClick={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()}>
       <motion.button
         ref={triggerRef}
-        className={`${isLcars ? styles.triggerLcars : styles.trigger} ${compact ? styles.triggerCompact : ""}`}
+        className={`${styles.trigger} ${compact ? styles.triggerCompact : ""}`}
         onClick={handleToggle}
         title="AI Actions"
-        whileHover={isLcars ? {} : {
+        whileHover={{
           scale: 1.1,
           boxShadow: "0 0 10px rgba(0,255,245,0.25)",
           borderColor: "rgba(0,255,245,0.5)",
@@ -165,7 +162,7 @@ export function ActionMenu({ source, context, compact }: ActionMenuProps) {
           {open && (
             <motion.div
               ref={menuRef}
-              className={isLcars ? styles.dropdownLcars : styles.dropdown}
+              className={styles.dropdown}
               style={{ top: dropdownPos.top, right: dropdownPos.right }}
               variants={dropdownVariants}
               initial="hidden"
@@ -175,13 +172,13 @@ export function ActionMenu({ source, context, compact }: ActionMenuProps) {
               {actions.map((action) => (
                 <motion.button
                   key={action.id}
-                  className={isLcars ? styles.menuItemLcars : styles.menuItem}
+                  className={styles.menuItem}
                   onClick={(e) => {
                     e.stopPropagation();
                     handleAction(action);
                   }}
                   variants={menuItemVariants}
-                  whileHover={isLcars ? {} : {
+                  whileHover={{
                     x: 4,
                     backgroundColor: "rgba(0,255,245,0.08)",
                     color: "var(--neon-cyan)",

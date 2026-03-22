@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::io::Read;
 use std::process::Stdio;
 use std::sync::Mutex;
@@ -7,6 +7,47 @@ use portable_pty::{native_pty_system, CommandBuilder, PtySize};
 use regex::Regex;
 use tauri::Emitter;
 use tokio::io::{AsyncBufReadExt, BufReader};
+
+/// Derive MCP server config JSON from the persona's allowed tools list.
+/// Scans for `mcp__<server>__*` prefixes and returns only the servers needed.
+fn build_mcp_config(allowed_tools: &Option<Vec<String>>) -> String {
+    let tools = match allowed_tools {
+        Some(t) if !t.is_empty() => t,
+        _ => return r#"{"mcpServers":{}}"#.to_string(),
+    };
+
+    // Collect unique MCP server names from tool prefixes
+    let mut servers: HashSet<&str> = HashSet::new();
+    for tool in tools {
+        if let Some(rest) = tool.strip_prefix("mcp__") {
+            if let Some(name) = rest.split("__").next() {
+                servers.insert(name);
+            }
+        }
+    }
+
+    if servers.is_empty() {
+        return r#"{"mcpServers":{}}"#.to_string();
+    }
+
+    // Known MCP server configurations
+    let mut mcp_servers = Vec::new();
+
+    if servers.contains("datadog-mcp") {
+        mcp_servers.push(r#""datadog-mcp":{"type":"http","url":"https://mcp.datadoghq.com/api/unstable/mcp-server/mcp"}"#);
+    }
+    if servers.contains("linear-server") {
+        mcp_servers.push(r#""linear-server":{"command":"npx","args":["-y","linear-mcp-server"]}"#);
+    }
+    if servers.contains("figma") {
+        mcp_servers.push(r#""figma":{"type":"http","url":"https://mcp.figma.com/mcp"}"#);
+    }
+    if servers.contains("playwright") {
+        mcp_servers.push(r#""playwright":{"command":"npx","args":["-y","@playwright/mcp@0.0.42"]}"#);
+    }
+
+    format!(r#"{{"mcpServers":{{{}}}}}"#, mcp_servers.join(","))
+}
 
 // Global PTY registry — maps pty_id to (master, child)
 static PTY_REGISTRY: Lazy<Mutex<HashMap<String, PtyHandle>>> = Lazy::new(|| Mutex::new(HashMap::new()));
@@ -19,6 +60,10 @@ static PID_REGISTRY: Lazy<Mutex<HashMap<String, u32>>> = Lazy::new(|| Mutex::new
 
 // Writer registry for interactive agents — maps pty_id to a reusable writer
 static PTY_WRITER_REGISTRY: Lazy<Mutex<HashMap<String, Box<dyn std::io::Write + Send>>>> =
+    Lazy::new(|| Mutex::new(HashMap::new()));
+
+// Session ID registry — maps task_id to Claude CLI session_id for --resume
+static SESSION_REGISTRY: Lazy<Mutex<HashMap<String, String>>> =
     Lazy::new(|| Mutex::new(HashMap::new()));
 
 struct PtyHandle {
@@ -67,7 +112,32 @@ pub async fn run_agent_command(
     let opts = options.unwrap_or_default();
 
     let mut cmd = tokio::process::Command::new("/Users/ajholloway/.local/bin/claude");
+    cmd.current_dir("/Users/ajholloway/Programming");
+
+    // Disable OTEL telemetry to prevent 1Password blocking
+    cmd.env("CLAUDE_CODE_ENABLE_TELEMETRY", "0");
+    cmd.env("OTEL_METRICS_EXPORTER", "");
+    cmd.env("OTEL_LOGS_EXPORTER", "");
+    cmd.env("OTEL_EXPORTER_OTLP_ENDPOINT", "");
+
     cmd.arg("--print");
+    cmd.arg("--output-format").arg("stream-json");
+    cmd.arg("--verbose");
+    cmd.arg("--include-partial-messages");
+
+    // Disable otelHeadersHelper; derive MCP config from allowed tools
+    cmd.arg("--settings").arg(r#"{"otelHeadersHelper":""}"#);
+    let mcp_config = build_mcp_config(&opts.allowed_tools);
+    cmd.arg("--mcp-config").arg(&mcp_config);
+    cmd.arg("--strict-mcp-config");
+
+    // Inject API keys for agents that use curl against external APIs
+    if let Ok(Some(dd_api)) = crate::services::credentials::get_credential("dd_api_key") {
+        cmd.env("DD_API_KEY", &dd_api);
+    }
+    if let Ok(Some(dd_app)) = crate::services::credentials::get_credential("dd_app_key") {
+        cmd.env("DD_APP_KEY", &dd_app);
+    }
 
     // Model: options.model takes precedence over top-level model param
     let effective_model = opts.model.as_deref().or(model.as_deref());
@@ -140,64 +210,123 @@ pub async fn run_agent_command(
     let app_clone = app.clone();
     let tid = task_id.clone();
 
-    // Stream stdout with question detection
-    // Agents are instructed to use "### Question for User" sections in their output
-    // when they need user input. We detect this pattern and emit agent-question events.
+    // Stream stdout — parse stream-json events for text deltas and tool use.
+    // Accumulates full text to detect question blocks at the end.
     let stdout_handle = tokio::spawn(async move {
         let reader = BufReader::new(stdout);
         let mut lines = reader.lines();
-        let mut question_block: Option<Vec<String>> = None;
+        let mut full_text = String::new();
 
         while let Ok(Some(line)) = lines.next_line().await {
-            // Detect question block start: "### Question for User" or "### Question"
-            if line.starts_with("### Question for User")
-                || line.starts_with("### Question")
-                || line.starts_with("## Question for User")
-            {
-                question_block = Some(Vec::new());
+            if line.trim().is_empty() {
+                continue;
             }
-            // Detect question block end: next heading or empty after content
-            else if question_block.is_some()
-                && (line.starts_with("### ") || line.starts_with("## "))
-            {
-                // New section started — emit the collected question
-                if let Some(block) = question_block.take() {
-                    let question_text = block
-                        .into_iter()
-                        .filter(|l| !l.trim().is_empty())
-                        .collect::<Vec<_>>()
-                        .join("\n");
-                    if !question_text.is_empty() {
-                        let _ = app_clone.emit(
-                            "agent-question",
-                            AgentQuestion {
-                                task_id: tid.clone(),
-                                question: question_text,
-                            },
-                        );
+
+            if let Ok(json) = serde_json::from_str::<serde_json::Value>(&line) {
+                let msg_type = json["type"].as_str().unwrap_or("");
+
+                match msg_type {
+                    "stream_event" => {
+                        let event_type = json["event"]["type"].as_str().unwrap_or("");
+                        if event_type == "content_block_delta" {
+                            if let Some(text) = json["event"]["delta"]["text"].as_str() {
+                                full_text.push_str(text);
+                                let _ = app_clone.emit(
+                                    "agent-output",
+                                    AgentOutput {
+                                        task_id: tid.clone(),
+                                        line: text.to_string(),
+                                        done: false,
+                                    },
+                                );
+                            }
+                        }
                     }
+                    // Tool use — emit a summary line so the timeline shows what the agent did
+                    "tool_use" => {
+                        let tool_name = json["name"].as_str().unwrap_or("tool");
+                        let input = &json["input"];
+                        let summary = match tool_name {
+                            "Edit" | "Write" => {
+                                let path = input["file_path"].as_str().unwrap_or("?");
+                                // Show just the filename, not the full path
+                                let short = path.rsplit('/').next().unwrap_or(path);
+                                format!("\n`{}` → **{}**\n", tool_name, short)
+                            }
+                            "Bash" => {
+                                let cmd_str = input["command"].as_str().unwrap_or("...");
+                                let truncated = if cmd_str.chars().count() > 120 {
+                                    let s: String = cmd_str.chars().take(120).collect();
+                                    format!("{}...", s)
+                                } else {
+                                    cmd_str.to_string()
+                                };
+                                format!("\n`$ {}`\n", truncated)
+                            }
+                            "Read" | "Glob" | "Grep" => {
+                                // Skip read-only tools to reduce noise
+                                String::new()
+                            }
+                            _ => {
+                                format!("\n`{}`\n", tool_name)
+                            }
+                        };
+                        if !summary.is_empty() {
+                            full_text.push_str(&summary);
+                            let _ = app_clone.emit(
+                                "agent-output",
+                                AgentOutput {
+                                    task_id: tid.clone(),
+                                    line: summary,
+                                    done: false,
+                                },
+                            );
+                        }
+                    }
+                    // Tool result — emit errors so they're visible
+                    "tool_result" => {
+                        let is_error = json["is_error"].as_bool().unwrap_or(false);
+                        if is_error {
+                            let content = json["content"].as_str()
+                                .or_else(|| json["output"].as_str())
+                                .unwrap_or("Unknown error");
+                            let truncated = if content.chars().count() > 300 {
+                                let s: String = content.chars().take(300).collect();
+                                format!("{}...", s)
+                            } else {
+                                content.to_string()
+                            };
+                            let msg = format!("\n> **Error**: {}\n", truncated);
+                            full_text.push_str(&msg);
+                            let _ = app_clone.emit(
+                                "agent-output",
+                                AgentOutput {
+                                    task_id: tid.clone(),
+                                    line: msg,
+                                    done: false,
+                                },
+                            );
+                        }
+                    }
+                    "result" => {
+                        // Capture session_id for potential --resume later
+                        if let Some(sid) = json["session_id"].as_str() {
+                            let mut reg = SESSION_REGISTRY.lock().unwrap();
+                            reg.insert(tid.clone(), sid.to_string());
+                        }
+                    }
+                    _ => {}
                 }
             }
-            // Accumulate question body lines
-            else if let Some(ref mut block) = question_block {
-                block.push(line.clone());
-            }
-
-            // Always emit the line as output too
-            let _ = app_clone.emit(
-                "agent-output",
-                AgentOutput {
-                    task_id: tid.clone(),
-                    line,
-                    done: false,
-                },
-            );
         }
 
-        // If stream ends while in a question block, emit what we have
-        if let Some(block) = question_block.take() {
-            let question_text = block
-                .into_iter()
+        // Detect question blocks in the accumulated text
+        let question_re = Regex::new(
+            r"(?m)^#{2,3}\s*Question(?:\s+for\s+User)?\s*\n([\s\S]*?)(?:\n#{2,3}\s|\z)"
+        ).unwrap();
+        if let Some(caps) = question_re.captures(&full_text) {
+            let question_text: String = caps[1]
+                .lines()
                 .filter(|l| !l.trim().is_empty())
                 .collect::<Vec<_>>()
                 .join("\n");
@@ -275,33 +404,150 @@ pub async fn run_agent_command(
     Ok(())
 }
 
-/// Respond to an interactive agent by writing to its stdin.
-/// For stream-json agents, sends a JSON user message.
-/// Also accepts task_id/question_id so the frontend store can track the answer.
+/// Respond to an interactive agent by spawning a new Claude CLI process
+/// with --resume to continue the conversation.
 #[tauri::command]
 pub async fn respond_to_agent(
+    app: tauri::AppHandle,
     task_id: String,
     _question_id: Option<String>,
     response: String,
 ) -> Result<(), String> {
-    use std::io::Write;
-    let mut registry = PTY_WRITER_REGISTRY.lock().unwrap();
-    if let Some(writer) = registry.get_mut(&task_id) {
-        // Send as stream-json formatted user message
-        let json_msg = serde_json::json!({
-            "type": "user",
-            "content": response
-        });
-        let mut message = serde_json::to_string(&json_msg).map_err(|e| e.to_string())?;
-        message.push('\n');
-        writer
-            .write_all(message.as_bytes())
-            .map_err(|e| format!("Failed to write to stdin: {}", e))?;
-        writer.flush().map_err(|e| format!("Failed to flush stdin: {}", e))?;
-        Ok(())
-    } else {
-        Ok(())
+    let session_id = {
+        let reg = SESSION_REGISTRY.lock().unwrap();
+        reg.get(&task_id).cloned()
+    };
+
+    let session_id = session_id.ok_or_else(|| {
+        "No session_id found for this conversation — cannot resume".to_string()
+    })?;
+
+    let mut cmd = tokio::process::Command::new("/Users/ajholloway/.local/bin/claude");
+    cmd.current_dir("/Users/ajholloway/Programming");
+
+    // Disable OTEL telemetry
+    cmd.env("CLAUDE_CODE_ENABLE_TELEMETRY", "0");
+    cmd.env("OTEL_METRICS_EXPORTER", "");
+    cmd.env("OTEL_LOGS_EXPORTER", "");
+    cmd.env("OTEL_EXPORTER_OTLP_ENDPOINT", "");
+
+    cmd.arg("--print");
+    cmd.arg("--output-format").arg("stream-json");
+    cmd.arg("--verbose");
+    cmd.arg("--include-partial-messages");
+
+    cmd.arg("--settings").arg(r#"{"otelHeadersHelper":""}"#);
+    cmd.arg("--mcp-config").arg(r#"{"mcpServers":{}}"#);
+    cmd.arg("--strict-mcp-config");
+
+    cmd.arg("--resume").arg(&session_id);
+    cmd.arg("--dangerously-skip-permissions");
+    cmd.arg(&response);
+
+    cmd.stdout(Stdio::piped());
+    cmd.stderr(Stdio::piped());
+
+    let mut child = cmd
+        .spawn()
+        .map_err(|e| format!("Failed to spawn claude --resume: {}", e))?;
+
+    let stdout = child.stdout.take().ok_or("No stdout")?;
+    let stderr = child.stderr.take().ok_or("No stderr")?;
+
+    // Store in registry so it can be killed
+    {
+        let mut registry = AGENT_REGISTRY.lock().unwrap();
+        registry.insert(task_id.clone(), child);
     }
+
+    let app_clone = app.clone();
+    let tid = task_id.clone();
+
+    // Stream stdout
+    let stdout_handle = tokio::spawn(async move {
+        let reader = BufReader::new(stdout);
+        let mut lines = reader.lines();
+
+        while let Ok(Some(line)) = lines.next_line().await {
+            if line.trim().is_empty() {
+                continue;
+            }
+
+            if let Ok(json) = serde_json::from_str::<serde_json::Value>(&line) {
+                let msg_type = json["type"].as_str().unwrap_or("");
+
+                match msg_type {
+                    "stream_event" => {
+                        let event_type = json["event"]["type"].as_str().unwrap_or("");
+                        if event_type == "content_block_delta" {
+                            if let Some(text) = json["event"]["delta"]["text"].as_str() {
+                                let _ = app_clone.emit(
+                                    "agent-output",
+                                    AgentOutput {
+                                        task_id: tid.clone(),
+                                        line: text.to_string(),
+                                        done: false,
+                                    },
+                                );
+                            }
+                        }
+                    }
+                    "result" => {
+                        // Update session_id in case it changed
+                        if let Some(sid) = json["session_id"].as_str() {
+                            let mut reg = SESSION_REGISTRY.lock().unwrap();
+                            reg.insert(tid.clone(), sid.to_string());
+                        }
+                    }
+                    _ => {}
+                }
+            }
+        }
+    });
+
+    let app_clone2 = app.clone();
+    let tid2 = task_id.clone();
+
+    // Stream stderr
+    let stderr_handle = tokio::spawn(async move {
+        let reader = BufReader::new(stderr);
+        let mut lines = reader.lines();
+        while let Ok(Some(line)) = lines.next_line().await {
+            let _ = app_clone2.emit(
+                "agent-output",
+                AgentOutput {
+                    task_id: tid2.clone(),
+                    line: format!("[stderr] {}", line),
+                    done: false,
+                },
+            );
+        }
+    });
+
+    let _ = stdout_handle.await;
+    let _ = stderr_handle.await;
+
+    // Wait on child
+    let maybe_child = {
+        let mut registry = AGENT_REGISTRY.lock().unwrap();
+        registry.remove(&task_id)
+    };
+
+    if let Some(mut child) = maybe_child {
+        let _ = child.wait().await;
+    }
+
+    // Emit done — the frontend will transition back to "waiting"
+    let _ = app.emit(
+        "agent-output",
+        AgentOutput {
+            task_id: task_id.clone(),
+            line: String::new(),
+            done: true,
+        },
+    );
+
+    Ok(())
 }
 
 /// Kill a running agent command process.
@@ -496,10 +742,19 @@ pub async fn run_interactive_agent(
     cmd.arg("--verbose");
     cmd.arg("--include-partial-messages");
 
-    // Disable otelHeadersHelper and use no MCP servers
+    // Disable otelHeadersHelper; derive MCP config from allowed tools
     cmd.arg("--settings").arg(r#"{"otelHeadersHelper":""}"#);
-    cmd.arg("--mcp-config").arg(r#"{"mcpServers":{}}"#);
+    let mcp_config = build_mcp_config(&opts.allowed_tools);
+    cmd.arg("--mcp-config").arg(&mcp_config);
     cmd.arg("--strict-mcp-config");
+
+    // Inject API keys for agents that use curl against external APIs
+    if let Ok(Some(dd_api)) = crate::services::credentials::get_credential("dd_api_key") {
+        cmd.env("DD_API_KEY", &dd_api);
+    }
+    if let Ok(Some(dd_app)) = crate::services::credentials::get_credential("dd_app_key") {
+        cmd.env("DD_APP_KEY", &dd_app);
+    }
 
     // Model
     let effective_model = opts.model.as_deref();
@@ -597,7 +852,11 @@ pub async fn run_interactive_agent(
                         // Full message — already streamed via deltas
                     }
                     "result" => {
-                        // Completion
+                        // Capture session_id for --resume follow-ups
+                        if let Some(sid) = json["session_id"].as_str() {
+                            let mut reg = SESSION_REGISTRY.lock().unwrap();
+                            reg.insert(tid.clone(), sid.to_string());
+                        }
                     }
                     _ => {}
                 }

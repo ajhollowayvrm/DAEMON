@@ -448,6 +448,149 @@
   color: var(--text-secondary);
 }
 
+/* ── Accept Quip Toast ── */
+
+.acceptQuip {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  right: var(--gap-lg);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: rgba(10, 10, 30, 0.95);
+  border: 1px solid var(--agent-color, var(--neon-cyan));
+  border-radius: 8px;
+  box-shadow:
+    0 0 12px rgba(0, 0, 0, 0.6),
+    0 0 20px color-mix(in srgb, var(--agent-color, var(--neon-cyan)) 15%, transparent);
+  backdrop-filter: blur(8px);
+  z-index: 200;
+  pointer-events: none;
+  max-width: 360px;
+  white-space: nowrap;
+}
+
+.acceptQuipAvatar {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1px solid var(--agent-color, var(--neon-cyan));
+  flex-shrink: 0;
+}
+
+.acceptQuipText {
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--text-primary);
+  font-style: italic;
+  letter-spacing: 0.3px;
+}
+
+/* ── Mission Chip ── */
+
+.agentTickerItemMission {
+  cursor: pointer;
+  gap: 5px;
+  border-color: rgba(255, 0, 170, 0.2);
+  background: rgba(255, 0, 170, 0.06);
+}
+
+.agentTickerItemMission:hover {
+  border-color: var(--neon-magenta);
+  background: rgba(255, 0, 170, 0.1);
+}
+
+.missionLabel {
+  font-family: var(--font-display);
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--neon-magenta);
+  opacity: 0.8;
+}
+
+.missionAvatars {
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+
+.missionAvatarWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: -4px;
+  transition: opacity 0.3s ease, filter 0.3s ease;
+}
+
+.missionAvatarWrapper:first-child {
+  margin-left: 0;
+}
+
+.missionAvatarImg {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1.5px solid rgba(176, 38, 255, 0.3);
+  flex-shrink: 0;
+  transition: border-color 0.3s ease, filter 0.3s ease, opacity 0.3s ease;
+}
+
+.missionAvatarFallback {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 9px;
+  font-weight: 700;
+  border: 1.5px solid rgba(176, 38, 255, 0.3);
+  color: var(--text-tertiary);
+  background: var(--bg-raised);
+  flex-shrink: 0;
+  transition: border-color 0.3s ease, filter 0.3s ease, opacity 0.3s ease;
+}
+
+.missionAvatarActive .missionAvatarImg,
+.missionAvatarActive .missionAvatarFallback {
+  border-color: var(--neon-cyan);
+  filter: none;
+  opacity: 1;
+  z-index: 2;
+}
+
+.missionAvatarDone .missionAvatarImg,
+.missionAvatarDone .missionAvatarFallback {
+  filter: grayscale(0.7);
+  opacity: 0.5;
+}
+
+.missionAvatarWaiting .missionAvatarImg,
+.missionAvatarWaiting .missionAvatarFallback {
+  filter: grayscale(0.5);
+  opacity: 0.4;
+}
+
+.missionAvatarPulse {
+  position: absolute;
+  inset: -2px;
+  border-radius: 50%;
+  opacity: 0.3;
+  animation: mission-avatar-pulse 1.5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes mission-avatar-pulse {
+  0%, 100% { transform: scale(1); opacity: 0.3; }
+  50% { transform: scale(1.3); opacity: 0; }
+}
+
 /* ── Hover Popup ── */
 
 .agentTickerPopup {
@@ -668,151 +811,127 @@
   padding-right: 24px;
 }
 
-/* ═══════════════════════════════════════════════════════════════════
-   LCARS Layout Variant — Segmented colored bar with pill badges,
-   curved elbow on right side. NO animations, NO pulse effects.
-   ═══════════════════════════════════════════════════════════════════ */
+/* ── Datadog Alerts Badge ── */
 
-.statusBarLcars {
-  height: 36px;
-  display: flex;
-  align-items: stretch;
-  padding: 0;
-  background: #000000;
-  border-top: none;
-  font-family: var(--font-display);
-  font-size: 11px;
-  color: #fff2cc;
-  position: relative;
-  z-index: 100;
-}
-
-/* No animated gradient line */
-.statusBarLcars::before {
-  display: none;
-}
-
-/* ── Simplified bar layout ── */
-.lcarsStatusSegments {
-  display: flex;
-  align-items: stretch;
-  gap: 3px;
-  width: 100%;
-  background: #000000;
-}
-
-/* ── Pill-shaped left end with tag text ── */
-.lcarsStatusPillLeft {
+.alertsBadge {
   display: flex;
   align-items: center;
-  padding: 0 14px;
-  border-radius: 18px 0 0 18px;
-  flex: 0 0 auto;
-}
-
-.lcarsStatusTagText {
-  color: #000000;
-  font-family: var(--font-display);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-
-/* ── Service indicators as small text labels ── */
-.lcarsStatusIndicators {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  padding: 0 12px;
-  background: #000000;
-}
-
-.lcarsStatusLabel {
-  font-family: var(--font-display);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-}
-
-.lcarsStatusLabelConnected {
-  color: #33cc99;
-}
-
-.lcarsStatusLabelDisconnected {
-  color: #555555;
-}
-
-/* ── Ticker inside fill segment ── */
-.lcarsStatusFillSeg {
-  display: flex;
-  align-items: center;
-  flex: 1 1 auto;
-  min-width: 0;
-  overflow: hidden;
-  border-radius: 0;
-}
-
-.lcarsTickerMask {
-  overflow: hidden;
-  flex: 1;
-  mask-image: linear-gradient(90deg, transparent 0%, black 10%, black 90%, transparent 100%);
-  -webkit-mask-image: linear-gradient(90deg, transparent 0%, black 10%, black 90%, transparent 100%);
-}
-
-.lcarsTickerInner {
-  display: flex;
-  white-space: nowrap;
-  animation: marquee-scroll 20s linear infinite;
-  color: #000000;
-  font-family: var(--font-display);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-}
-
-.lcarsTickerInner span {
-  padding-right: 24px;
-}
-
-/* ── Time text label ── */
-.lcarsStatusTimeText {
-  display: flex;
-  align-items: center;
-  padding: 0 10px;
-  background: #000000;
-  color: #ff9933;
-  font-family: var(--font-display);
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 1px;
-  font-variant-numeric: tabular-nums;
-}
-
-/* ── Settings button — minimal ── */
-.settingsBtnLcars {
-  flex: 0 0 auto;
-  background: #000000;
-  border: none;
-  color: #9966cc;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: rgba(255, 51, 102, 0.1);
+  border: 1px solid rgba(255, 51, 102, 0.3);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--neon-red, #ff3366);
   cursor: pointer;
-  padding: 0 10px;
+  transition: all 0.15s;
+  animation: alerts-badge-pulse 2s ease-in-out infinite;
+}
+
+.alertsBadge:hover {
+  background: rgba(255, 51, 102, 0.18);
+  border-color: rgba(255, 51, 102, 0.5);
+  box-shadow: 0 0 10px rgba(255, 51, 102, 0.2);
+}
+
+@keyframes alerts-badge-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+/* ── Alerts Popup ── */
+
+.alertsPopup {
+  position: fixed;
+  width: 300px;
+  max-height: 320px;
+  overflow-y: auto;
+  padding: var(--gap-sm) var(--gap-md);
+  background: var(--bg-raised);
+  border: 1px solid rgba(255, 51, 102, 0.2);
+  border-radius: var(--radius-md);
+  box-shadow:
+    0 -4px 20px rgba(0, 0, 0, 0.6),
+    0 0 15px rgba(255, 51, 102, 0.1);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.alertsPopupTitle {
+  font-family: var(--font-display);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--neon-red, #ff3366);
+  padding-bottom: 4px;
+  border-bottom: 1px solid rgba(255, 51, 102, 0.15);
+}
+
+.alertsPopupItem {
   display: flex;
   align-items: center;
-  font-weight: 700;
-  transition: color 0.15s;
+  gap: 8px;
+  padding: 5px 6px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background 0.12s;
 }
 
-.settingsBtnLcars:hover {
-  color: #9999ff;
+.alertsPopupItem:hover {
+  background: rgba(255, 51, 102, 0.06);
 }
 
-/* ── Pill-shaped right end ── */
-.lcarsStatusElbow {
-  flex: 0 0 44px;
-  background: #ff9933;
-  border-radius: 18px 0 0 18px;
+.alertsPopupDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
 }
+
+.statusDotAlert {
+  background: var(--neon-red, #ff3366);
+  box-shadow: 0 0 6px rgba(255, 51, 102, 0.6);
+}
+
+.statusDotWarn {
+  background: var(--neon-yellow, #ffe600);
+  box-shadow: 0 0 4px rgba(255, 230, 0, 0.5);
+}
+
+.alertsPopupName {
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--text-primary);
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.alertsPopupStatus {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  padding: 1px 5px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.alertsPopupStatusAlert {
+  background: rgba(255, 51, 102, 0.12);
+  color: var(--neon-red, #ff3366);
+  border: 1px solid rgba(255, 51, 102, 0.25);
+}
+
+.alertsPopupStatusWarn {
+  background: rgba(255, 230, 0, 0.1);
+  color: var(--neon-yellow, #ffe600);
+  border: 1px solid rgba(255, 230, 0, 0.2);
+}
+

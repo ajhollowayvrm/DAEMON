@@ -4,3 +4,6 @@ export { useLinearIssues } from "./useLinearIssues";
 export { useIssueDetail } from "./useIssueDetail";
 export { useThreadReplies } from "./useThreadReplies";
 export { useWatchedThreads } from "./useWatchedThreads";
+export { useDatadogMonitors } from "./useDatadogMonitors";
+export { useCorrelationEngine } from "./useCorrelationEngine";
+export { useMonitorDetectors } from "./useMonitorDetectors";

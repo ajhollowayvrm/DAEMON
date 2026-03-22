@@ -1,5 +1,6 @@
-import { useState, useEffect, useRef, useCallback } from "react";
-import { Check, RefreshCw, Settings } from "lucide-react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { createPortal } from "react-dom";
+import { Check, RefreshCw, Settings, Link2, AlertTriangle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import styles from "./StatusBar.module.css";
 import { useTheme } from "../../themes";
@@ -7,7 +8,9 @@ import { usePersonaStore } from "../../stores/personaStore";
 import { useChatStore } from "../../stores/chatStore";
 import { useLayoutStore } from "../../stores/layoutStore";
 import { getPersonaById } from "../../config/personas";
-import { useSlackSections, useMergeRequests, useLinearIssues } from "../../hooks";
+import { useSlackSections, useMergeRequests, useLinearIssues, useDatadogMonitors } from "../../hooks";
+import { useCorrelationStore } from "../../stores/correlationStore";
+import type { MissionTask } from "../../config/personaTypes";
 
 // ── Types ──
 
@@ -55,6 +58,131 @@ function queryToState(status: string, isRefetching: boolean): ConnectionState {
   if (status === "error") return "error";
   if (status === "pending" && !isRefetching) return "loading";
   return "connected";
+}
+
+// ── Correlation Engine Indicator ──
+
+function CorrelationIndicator() {
+  const revision = useCorrelationStore((s) => s.revision);
+  const linkCount = useCorrelationStore((s) => Object.keys(s.index).length);
+
+  return (
+    <div className={styles.indicator}>
+      <Link2 size={9} style={{ color: revision > 0 ? "var(--neon-cyan)" : "var(--text-muted)", opacity: 0.6 }} />
+      <span>{linkCount > 0 ? linkCount : "..."}</span>
+
+      <div className={styles.servicePopup}>
+        <div className={styles.servicePopupHeader}>
+          <span className={`${styles.servicePopupDot} ${revision > 0 ? styles.dotConnected : styles.dotLoading}`} />
+          <span className={styles.servicePopupName}>Correlations</span>
+          <span className={`${styles.servicePopupState} ${revision > 0 ? styles.servicePopupStateOk : styles.servicePopupStateLoad}`}>
+            {revision > 0 ? "Active" : "Building..."}
+          </span>
+        </div>
+        <div className={styles.servicePopupMeta}>
+          <span>{linkCount} linked entities · rev {revision}</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Datadog Alerts Badge ──
+
+function AlertsBadge() {
+  const { data: monitors } = useDatadogMonitors();
+  const openMonitor = useLayoutStore((s) => s.openMonitor);
+  const setActivePanel = useLayoutStore((s) => s.setActivePanel);
+  const [hovered, setHovered] = useState(false);
+  const badgeRef = useRef<HTMLDivElement>(null);
+  const popupRef = useRef<HTMLDivElement>(null);
+  const hideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [popupPos, setPopupPos] = useState({ top: 0, left: 0 });
+
+  const alerting = useMemo(
+    () => monitors?.filter((m) => m.status === "Alert" || m.status === "Warn") ?? [],
+    [monitors],
+  );
+
+  const showPopup = useCallback(() => {
+    if (hideTimer.current) clearTimeout(hideTimer.current);
+    if (badgeRef.current) {
+      const rect = badgeRef.current.getBoundingClientRect();
+      setPopupPos({ top: rect.top - 8, left: Math.max(8, rect.right - 300) });
+    }
+    setHovered(true);
+  }, []);
+
+  const scheduleHide = useCallback(() => {
+    hideTimer.current = setTimeout(() => setHovered(false), 200);
+  }, []);
+
+  const cancelHide = useCallback(() => {
+    if (hideTimer.current) clearTimeout(hideTimer.current);
+  }, []);
+
+  if (alerting.length === 0) return null;
+
+  const alertCount = alerting.filter((m) => m.status === "Alert").length;
+  const warnCount = alerting.filter((m) => m.status === "Warn").length;
+
+  return (
+    <>
+      <div
+        ref={badgeRef}
+        className={styles.alertsBadge}
+        onMouseEnter={showPopup}
+        onMouseLeave={scheduleHide}
+        onClick={(e) => {
+          e.stopPropagation();
+          setActivePanel("datadog");
+        }}
+      >
+        <AlertTriangle size={10} />
+        <span>
+          {alertCount > 0 && `${alertCount} alert${alertCount > 1 ? "s" : ""}`}
+          {alertCount > 0 && warnCount > 0 && " · "}
+          {warnCount > 0 && `${warnCount} warn`}
+        </span>
+      </div>
+
+      {hovered &&
+        createPortal(
+          <div
+            ref={popupRef}
+            className={styles.alertsPopup}
+            style={{ top: popupPos.top, left: popupPos.left, transform: "translateY(-100%)" }}
+            onMouseEnter={cancelHide}
+            onMouseLeave={scheduleHide}
+          >
+            <div className={styles.alertsPopupTitle}>Active Alerts</div>
+            {alerting.map((m) => (
+              <div
+                key={m.id}
+                className={styles.alertsPopupItem}
+                onClick={() => {
+                  setHovered(false);
+                  openMonitor(m.id);
+                }}
+              >
+                <span
+                  className={`${styles.alertsPopupDot} ${
+                    m.status === "Alert" ? styles.statusDotAlert : styles.statusDotWarn
+                  }`}
+                />
+                <span className={styles.alertsPopupName}>{m.name}</span>
+                <span className={`${styles.alertsPopupStatus} ${
+                  m.status === "Alert" ? styles.alertsPopupStatusAlert : styles.alertsPopupStatusWarn
+                }`}>
+                  {m.status}
+                </span>
+              </div>
+            ))}
+          </div>,
+          document.body,
+        )}
+    </>
+  );
 }
 
 // ── Service Indicator with Tooltip ──
@@ -269,14 +397,134 @@ function QuestionChip({ agent, persona }: QuestionChipProps) {
   );
 }
 
+// ── Mission Chip — shows squad avatars with active/done/waiting states ──
+
+function MissionChip({ mission, onClick }: { mission: MissionTask; onClick: () => void }) {
+  const entries = mission.timelineEntries ?? [];
+  const isRunning = mission.status === "running";
+  const isDone = mission.status === "completed" || mission.status === "failed";
+
+  return (
+    <motion.div
+      className={`${styles.agentTickerItem} ${styles.agentTickerItemMission} ${isDone ? styles.agentTickerItemDone : ""}`}
+      initial={{ opacity: 0, scale: 0, width: 0 }}
+      animate={{ opacity: 1, scale: 1, width: "auto" }}
+      exit={{ opacity: 0, scale: 0, width: 0 }}
+      transition={agentSpring}
+      onClick={onClick}
+    >
+      <span className={styles.missionLabel}>MISSION</span>
+      <div className={styles.missionAvatars}>
+        {entries
+          .filter((e) => !e.isRetry && e.personaId !== "_commit")
+          .map((entry) => {
+            const persona = getPersonaById(entry.personaId);
+            if (!persona) return null;
+            const isActive = entry.status === "active";
+            const entryDone = entry.status === "done" || entry.status === "failed";
+            return (
+              <div
+                key={entry.id}
+                className={`${styles.missionAvatarWrapper} ${
+                  isActive
+                    ? styles.missionAvatarActive
+                    : entryDone
+                      ? styles.missionAvatarDone
+                      : styles.missionAvatarWaiting
+                }`}
+              >
+                {persona.avatar ? (
+                  <img
+                    src={persona.avatar}
+                    alt={persona.name}
+                    className={styles.missionAvatarImg}
+                    style={isActive ? { borderColor: persona.color } : undefined}
+                  />
+                ) : (
+                  <span
+                    className={styles.missionAvatarFallback}
+                    style={isActive ? { borderColor: persona.color, color: persona.color } : undefined}
+                  >
+                    {persona.name[0]}
+                  </span>
+                )}
+                {isActive && <span className={styles.missionAvatarPulse} style={{ background: persona.color }} />}
+              </div>
+            );
+          })}
+      </div>
+      {isDone && (
+        <span className={`${styles.agentTickerCheck} ${mission.status === "failed" ? styles.agentTickerCheckFailed : ""}`}>
+          <Check size={8} />
+        </span>
+      )}
+
+      {/* Hover popup */}
+      <div className={styles.agentTickerPopup}>
+        <div className={styles.agentTickerPopupHeader}>
+          <div>
+            <span className={styles.agentTickerPopupName} style={{ color: "var(--neon-magenta)" }}>
+              Mission
+            </span>
+            <span className={styles.agentTickerPopupRole}>
+              {isRunning ? "In progress" : mission.status}
+            </span>
+          </div>
+          {isDone && (
+            <span className={`${styles.servicePopupState} ${
+              mission.status === "completed" ? styles.servicePopupStateOk : styles.servicePopupStateErr
+            }`}>
+              {mission.status === "completed" ? "Done" : "Failed"}
+            </span>
+          )}
+        </div>
+        <div className={styles.agentTickerPopupPrompt}>
+          {mission.description}
+        </div>
+        <div className={styles.agentTickerPopupHint}>
+          Click to view timeline
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+interface AcceptQuip {
+  id: string;
+  personaId: string;
+  text: string;
+}
+
 function AgentTicker() {
   const backgroundRuns = usePersonaStore((s) => s.backgroundRuns);
   const activeSingleRun = usePersonaStore((s) => s.activeSingleRun);
+  const [quips, setQuips] = useState<AcceptQuip[]>([]);
+  const seenRunIds = useRef(new Set<string>());
+
+  // Show acceptance quip when a new background run appears
+  useEffect(() => {
+    for (const run of backgroundRuns) {
+      if (seenRunIds.current.has(run.id)) continue;
+      seenRunIds.current.add(run.id);
+      const persona = getPersonaById(run.personaId);
+      if (!persona?.acceptQuips?.length) continue;
+      const text = persona.acceptQuips[Math.floor(Math.random() * persona.acceptQuips.length)];
+      const quipId = run.id;
+      setQuips((prev) => [...prev, { id: quipId, personaId: run.personaId, text }]);
+      setTimeout(() => {
+        setQuips((prev) => prev.filter((q) => q.id !== quipId));
+      }, 3000);
+    }
+  }, [backgroundRuns]);
   const activeMission = usePersonaStore((s) => s.activeMission);
+  const lastCompletedMission = usePersonaStore((s) => s.lastCompletedMission);
   const completedUnseen = usePersonaStore((s) => s.completedUnseen);
   const pendingQuestions = usePersonaStore((s) => s.pendingQuestions);
   const dismissCompletedRun = usePersonaStore((s) => s.dismissCompletedRun);
+  const setViewingMission = usePersonaStore((s) => s.setViewingMission);
+  const dismissLastCompletedMission = usePersonaStore((s) => s.dismissLastCompletedMission);
   const setActivePanel = useLayoutStore((s) => s.setActivePanel);
+  const conversations = useChatStore((s) => s.conversations);
 
   // Build the set of task IDs that have pending (unanswered) questions so we
   // can suppress the normal "running" chip for those agents.
@@ -313,18 +561,6 @@ function AgentTicker() {
       status: "running",
     });
   }
-  // Active mission persona
-  if (activeMission?.status === "running") {
-    const activeEntry = activeMission.timelineEntries.find((e) => e.status === "active");
-    if (activeEntry && !questionTaskIds.has(activeEntry.id)) {
-      agents.push({
-        id: activeEntry.id,
-        personaId: activeEntry.personaId,
-        prompt: activeMission.description,
-        status: "running",
-      });
-    }
-  }
   // Completed but unseen
   for (const run of completedUnseen) {
     agents.push({
@@ -335,11 +571,33 @@ function AgentTicker() {
     });
   }
 
-  if (agents.length === 0) return null;
+  // Mission chip (active or just-completed)
+  const missionToShow = activeMission ?? lastCompletedMission;
+
+  if (agents.length === 0 && !missionToShow) return null;
 
   return (
     <div className={styles.agentTicker}>
       <AnimatePresence>
+        {/* Mission chip */}
+        {missionToShow && (
+          <MissionChip
+            key={`mission-${missionToShow.id}`}
+            mission={missionToShow}
+            onClick={() => {
+              if (activeMission) {
+                // Just navigate to agents panel — ActiveMissionView will show
+                setActivePanel("agents");
+              } else if (lastCompletedMission) {
+                // Set viewingMission and navigate
+                setViewingMission(lastCompletedMission);
+                dismissLastCompletedMission();
+                setActivePanel("agents");
+              }
+            }}
+          />
+        )}
+
         {agents.map((agent) => {
           const persona = getPersonaById(agent.personaId);
           if (!persona) return null;
@@ -369,11 +627,16 @@ function AgentTicker() {
               animate={{ opacity: 1, scale: 1, width: "auto" }}
               exit={{ opacity: 0, scale: 0, width: 0 }}
               transition={agentSpring}
-              style={{ "--agent-color": persona.color } as React.CSSProperties}
-              onClick={isDone ? () => {
+              style={{ "--agent-color": persona.color, cursor: "pointer" } as React.CSSProperties}
+              onClick={() => {
+                if (conversations[agent.id]) {
+                  useChatStore.getState().setActiveConversation(agent.id);
+                }
                 setActivePanel("agents");
-                dismissCompletedRun(agent.id);
-              } : undefined}
+                if (isDone) {
+                  dismissCompletedRun(agent.id);
+                }
+              }}
             >
               {persona.avatar && (
                 <img
@@ -423,12 +686,38 @@ function AgentTicker() {
                 <div className={styles.agentTickerPopupPrompt}>
                   {agent.prompt}
                 </div>
-                {isDone && (
-                  <div className={styles.agentTickerPopupHint}>
-                    Click to view output
-                  </div>
-                )}
+                <div className={styles.agentTickerPopupHint}>
+                  {isDone ? "Click to view output" : "Click to view live output"}
+                </div>
               </div>
+            </motion.div>
+          );
+        })}
+      </AnimatePresence>
+
+      {/* Acceptance quip toasts */}
+      <AnimatePresence>
+        {quips.map((quip) => {
+          const qPersona = getPersonaById(quip.personaId);
+          if (!qPersona) return null;
+          return (
+            <motion.div
+              key={quip.id}
+              className={styles.acceptQuip}
+              initial={{ opacity: 0, y: 10, scale: 0.9 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -8, scale: 0.95 }}
+              transition={{ type: "spring", stiffness: 400, damping: 25 }}
+              style={{ "--agent-color": qPersona.color } as React.CSSProperties}
+            >
+              {qPersona.avatar && (
+                <img
+                  src={qPersona.avatar}
+                  alt={qPersona.name}
+                  className={styles.acceptQuipAvatar}
+                />
+              )}
+              <span className={styles.acceptQuipText}>{quip.text}</span>
             </motion.div>
           );
         })}
@@ -442,14 +731,14 @@ function AgentTicker() {
 export function StatusBar({ onOpenSettings }: { onOpenSettings: () => void }) {
   const time = useClockTime();
   const { theme } = useTheme();
-  const { leftTag, rightTag, tickerMessages } = theme.statusBar;
+  const { rightTag, tickerMessages } = theme.statusBar;
   const tickerLoop = [...tickerMessages, ...tickerMessages];
-  const isLcars = theme.layoutStyle === "lcars";
 
   // Live service status from TanStack Query
   const slack = useSlackSections();
   const gitlab = useMergeRequests();
   const linear = useLinearIssues();
+  const datadog = useDatadogMonitors();
 
   const services: ServiceInfo[] = [
     {
@@ -476,43 +765,15 @@ export function StatusBar({ onOpenSettings }: { onOpenSettings: () => void }) {
       error: linear.error?.message,
       refetch: () => linear.refetch(),
     },
+    {
+      name: "Datadog",
+      state: queryToState(datadog.status, datadog.isRefetching),
+      lastUpdated: datadog.dataUpdatedAt || null,
+      isRefetching: datadog.isRefetching,
+      error: datadog.error?.message,
+      refetch: () => datadog.refetch(),
+    },
   ];
-
-  if (isLcars) {
-    return (
-      <div className={styles.statusBarLcars}>
-        <div className={styles.lcarsStatusSegments}>
-          <div className={styles.lcarsStatusPillLeft} style={{ background: "#cc9966" }}>
-            <span className={styles.lcarsStatusTagText}>{leftTag}</span>
-          </div>
-          <div className={styles.lcarsStatusIndicators}>
-            {services.map((service) => (
-              <span
-                key={service.name}
-                className={`${styles.lcarsStatusLabel} ${service.state === "connected" ? styles.lcarsStatusLabelConnected : styles.lcarsStatusLabelDisconnected}`}
-              >
-                {service.name}
-              </span>
-            ))}
-          </div>
-          <div className={styles.lcarsStatusFillSeg} style={{ background: "#ff9933" }}>
-            <div className={styles.lcarsTickerMask}>
-              <div className={styles.lcarsTickerInner}>
-                {tickerLoop.map((msg, idx) => (
-                  <span key={idx}>{msg}</span>
-                ))}
-              </div>
-            </div>
-          </div>
-          <div className={styles.lcarsStatusTimeText}>{time}</div>
-          <button className={styles.settingsBtnLcars} onClick={onOpenSettings}>
-            <Settings size={13} />
-          </button>
-          <div className={styles.lcarsStatusElbow} />
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className={styles.statusBar}>
@@ -520,6 +781,8 @@ export function StatusBar({ onOpenSettings }: { onOpenSettings: () => void }) {
         {services.map((service) => (
           <ServiceIndicator key={service.name} service={service} />
         ))}
+        <CorrelationIndicator />
+        <AlertsBadge />
       </div>
       <AgentTicker />
       <div className={styles.dataTicker}>

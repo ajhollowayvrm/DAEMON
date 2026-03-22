@@ -6,6 +6,9 @@ import { GitLabPanel } from "../../panels/gitlab/GitLabPanel";
 import { AgentsPanel } from "../../panels/agents/AgentsPanel";
 import { LinearPanel } from "../../panels/linear/LinearPanel";
 import { TodosPanel } from "../../panels/todos/TodosPanel";
+import { ArchivePanel } from "../../panels/archive/ArchivePanel";
+import { BrowserPanel } from "../../panels/browser/BrowserPanel";
+import { DatadogPanel } from "../../panels/datadog/DatadogPanel";
 import styles from "./MainContent.module.css";
 
 const PANEL_COMPONENTS: Record<PanelId, ComponentType> = {
@@ -15,6 +18,9 @@ const PANEL_COMPONENTS: Record<PanelId, ComponentType> = {
   agents: AgentsPanel,
   linear: LinearPanel,
   todos: TodosPanel,
+  archive: ArchivePanel,
+  browser: BrowserPanel,
+  datadog: DatadogPanel,
 };
 
 export function MainContent() {

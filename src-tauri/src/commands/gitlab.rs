@@ -1,4 +1,5 @@
 use crate::models::gitlab::{EnrichedMergeRequest, MergeRequest, MergeRequestRaw};
+use crate::models::gitlab_detail::{DiffChange, FileDiff, MRDiff};
 use crate::services::credentials;
 use crate::services::gitlab::GitLabClient;
 
@@ -372,4 +373,56 @@ pub async fn retry_job(project_id: u64, job_id: u64) -> Result<bool, String> {
         let body = resp.text().await.unwrap_or_default();
         Err(format!("Retry failed: {}", body))
     }
+}
+
+// ── MR Diff ──────────────────────────────────────────────────
+
+#[derive(Debug, serde::Deserialize)]
+struct MRChangesResponse {
+    changes: Vec<DiffChange>,
+}
+
+#[tauri::command]
+pub async fn get_mr_diff(project_id: u64, mr_iid: u64) -> Result<MRDiff, String> {
+    let token = get_token()?;
+    let http = build_http(&token)?;
+
+    let url = format!(
+        "https://gitlab.com/api/v4/projects/{}/merge_requests/{}/changes",
+        project_id, mr_iid
+    );
+
+    let resp: MRChangesResponse = http
+        .get(&url)
+        .query(&[("per_page", "100")])
+        .send()
+        .await
+        .map_err(|e| e.to_string())?
+        .json()
+        .await
+        .map_err(|e| e.to_string())?;
+
+    let files: Vec<FileDiff> = resp
+        .changes
+        .into_iter()
+        .map(|c| {
+            let status = if c.new_file {
+                "added"
+            } else if c.deleted_file {
+                "deleted"
+            } else if c.renamed_file {
+                "renamed"
+            } else {
+                "modified"
+            };
+            FileDiff {
+                old_path: c.old_path,
+                new_path: c.new_path,
+                status: status.to_string(),
+                diff: c.diff,
+            }
+        })
+        .collect();
+
+    Ok(MRDiff { files })
 }

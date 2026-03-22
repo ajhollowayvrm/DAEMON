@@ -14,6 +14,8 @@ import Markdown from "react-markdown";
 import { Panel } from "../../components/layout/Panel";
 import { NeonButton } from "../../components/ui/NeonButton";
 import { MissionControl } from "./MissionControl";
+import { usePersonaStore } from "../../stores/personaStore";
+import { useChatStore } from "../../stores/chatStore";
 import styles from "./AgentsPanel.module.css";
 
 interface Command {
@@ -253,6 +255,20 @@ export function AgentsPanel() {
   const [tasks, setTasks] = useState<RunningTask[]>([]);
   const [activeTaskId, setActiveTaskId] = useState<string | null>(null);
 
+  // Detect if a chat/mission/single-run is active (tabs should hide)
+  const activeSingleRun = usePersonaStore((s) => s.activeSingleRun);
+  const activeMission = usePersonaStore((s) => s.activeMission);
+  const viewingMission = usePersonaStore((s) => s.viewingMission);
+  const conversations = useChatStore((s) => s.conversations);
+  const activeConversationId = useChatStore((s) => s.activeConversationId);
+  const chatActive = !!(
+    (activeSingleRun?.id && conversations[activeSingleRun.id]) ||
+    (activeConversationId && conversations[activeConversationId]) ||
+    activeSingleRun ||
+    activeMission ||
+    viewingMission
+  );
+
   // Listen for agent output events
   useEffect(() => {
     const unlisten = listen<AgentOutput>("agent-output", (event) => {
@@ -318,23 +334,25 @@ export function AgentsPanel() {
 
   return (
     <Panel title="Agent Teams" icon={Bot} badge={`${TEAMS.length} teams`}>
-      {/* Mode tabs */}
-      <div className={styles.modeTabs}>
-        <button
-          className={`${styles.modeTab} ${mode === "personas" ? styles.modeTabActive : ""}`}
-          onClick={() => setMode("personas")}
-        >
-          Personas
-        </button>
-        <button
-          className={`${styles.modeTab} ${mode === "commands" ? styles.modeTabActive : ""}`}
-          onClick={() => setMode("commands")}
-        >
-          Commands
-        </button>
-      </div>
+      {/* Mode tabs — hidden when chat/mission is active */}
+      {!chatActive && (
+        <div className={styles.modeTabs}>
+          <button
+            className={`${styles.modeTab} ${mode === "personas" ? styles.modeTabActive : ""}`}
+            onClick={() => setMode("personas")}
+          >
+            Personas
+          </button>
+          <button
+            className={`${styles.modeTab} ${mode === "commands" ? styles.modeTabActive : ""}`}
+            onClick={() => setMode("commands")}
+          >
+            Commands
+          </button>
+        </div>
+      )}
 
-      {mode === "personas" ? (
+      {mode === "personas" || chatActive ? (
         <MissionControl />
       ) : (
       <>

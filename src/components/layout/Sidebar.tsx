@@ -5,17 +5,18 @@ import {
   GitMerge,
   Bot,
   LayoutList,
-  CheckSquare,
+  Archive,
+  Globe,
+  Activity,
 } from "lucide-react";
 import { motion, AnimatePresence, type Variants } from "framer-motion";
 import { SidebarNavItem } from "./SidebarNavItem";
 import { useLayoutStore, type PanelId } from "../../stores/layoutStore";
 import { useSlackSections } from "../../hooks";
-import { useMergeRequests, useLinearIssues } from "../../hooks";
+import { useMergeRequests, useLinearIssues, useDatadogMonitors } from "../../hooks";
 import { useTodos } from "../../hooks/useTodos";
 import { usePersonaStore } from "../../stores/personaStore";
 import { getPersonaById } from "../../config/personas";
-import { useTheme } from "../../themes";
 import styles from "./Sidebar.module.css";
 
 const NAV_ITEMS: {
@@ -24,11 +25,13 @@ const NAV_ITEMS: {
   icon: typeof MessageSquare;
 }[] = [
   { id: "hub", label: "Hub", icon: LayoutDashboard },
-  { id: "todos", label: "To-Dos", icon: CheckSquare },
   { id: "slack", label: "Slack", icon: MessageSquare },
   { id: "linear", label: "Linear", icon: LayoutList },
   { id: "gitlab", label: "GitLab", icon: GitMerge },
   { id: "agents", label: "Agents", icon: Bot },
+  { id: "datadog", label: "Monitors", icon: Activity },
+  { id: "browser", label: "Browse", icon: Globe },
+  { id: "archive", label: "Archive", icon: Archive },
 ];
 
 /** Width of the proximity detection zone in pixels */
@@ -88,8 +91,6 @@ const navItemVariants = {
 } satisfies Record<string, object>;
 
 export function Sidebar() {
-  const { theme } = useTheme();
-  const isLcars = theme.layoutStyle === "lcars";
   const { activePanel, setActivePanel } = useLayoutStore();
   const booting = useLayoutStore((s) => s.booting);
 
@@ -136,6 +137,7 @@ export function Sidebar() {
   const { data: slackSections } = useSlackSections();
   const { data: mergeRequests } = useMergeRequests();
   const { data: linearIssues } = useLinearIssues();
+  const { data: datadogMonitors } = useDatadogMonitors();
   const { todos, criticalCount } = useTodos();
 
   const slackUnread = slackSections
@@ -145,7 +147,20 @@ export function Sidebar() {
       )
     : 0;
   const mrCount = mergeRequests?.filter((mr) => mr.needs_your_approval).length ?? 0;
-  const linearCount = linearIssues?.filter((i) => i.assignee_is_me).length ?? 0;
+  const ddAlertMonitors = datadogMonitors?.filter((m) => m.status === "Alert" || m.status === "Warn") ?? [];
+  const ddAlertCount = ddAlertMonitors.length;
+  const ddCommsAlertCount = ddAlertMonitors.filter((m) => m.tags.includes("team:comms")).length;
+  const linearCount = linearIssues?.filter((i) => {
+    if (!i.assignee_is_me) return false;
+    if (i.status_type === "cancelled") return false;
+    if (i.status_type === "backlog") return false;
+    // Deployed/completed older than 7 days — stale, hide
+    if (i.status_type === "completed" || i.status === "Deployed") {
+      const age = Date.now() - new Date(i.updated_at).getTime();
+      if (age > 7 * 86_400_000) return false;
+    }
+    return true;
+  }).length ?? 0;
   const todoCount = todos.length;
 
   // Agent activity indicator
@@ -187,6 +202,12 @@ export function Sidebar() {
         return criticalCount || undefined;
       case "todos":
         return todoCount || undefined;
+      case "datadog":
+        return ddAlertCount || undefined;
+      case "archive":
+        return undefined;
+      case "browser":
+        return undefined;
       case "slack":
         return slackUnread || undefined;
       case "gitlab":
@@ -198,6 +219,13 @@ export function Sidebar() {
       default:
         return undefined;
     }
+  };
+
+  const getSecondaryBadge = (id: PanelId): { count: number; label: string } | undefined => {
+    if (id === "datadog" && ddCommsAlertCount > 0) {
+      return { count: ddCommsAlertCount, label: `${ddCommsAlertCount} comms` };
+    }
+    return undefined;
   };
 
   // Compute sidebar width for the collapsed x offset
@@ -214,11 +242,11 @@ export function Sidebar() {
     return -260;
   };
 
-  const baseClass = isLcars ? styles.sidebarLcars : styles.sidebar;
+  const baseClass = styles.sidebar;
 
   // Pulse edge: dynamic intensity based on proximity (when approaching)
   // or softened (when sidebar is fully revealed)
-  const rgbColor = isLcars ? "255, 153, 51" : "0, 255, 245";
+  const rgbColor = "0, 255, 245";
   const edgeIntensity = revealed ? 0.15 : proximity;
   const edgeStyle = {
     opacity: edgeIntensity > 0 ? 1 : 0,
@@ -229,9 +257,7 @@ export function Sidebar() {
 
   // Box shadow is driven by Framer animate prop (not CSS class) so it can
   // vary between collapsed (none) and revealed (full purple/cyan glow).
-  const revealedBoxShadow = isLcars
-    ? "4px 0 24px rgba(0, 0, 0, 0.8)"
-    : "4px 0 30px rgba(0, 0, 0, 0.7), 2px 0 15px rgba(176, 38, 255, 0.25), 0 0 60px rgba(0, 255, 245, 0.08)";
+  const revealedBoxShadow = "4px 0 30px rgba(0, 0, 0, 0.7), 2px 0 15px rgba(176, 38, 255, 0.25), 0 0 60px rgba(0, 255, 245, 0.08)";
 
   // Don't render anything during boot — hot zone z-index is above boot overlay
   if (booting) return null;
@@ -279,11 +305,7 @@ export function Sidebar() {
                   key={item.id}
                   variants={navItemVariants as Variants}
                   // Cyberpunk whileHover: slide right, glow border flare
-                  whileHover={
-                    isLcars
-                      ? { scale: 1.02, x: 3, transition: { type: "spring" as const, stiffness: 500, damping: 20 } }
-                      : { x: 4, transition: { type: "spring" as const, stiffness: 500, damping: 20 } }
-                  }
+                  whileHover={{ x: 4, transition: { type: "spring" as const, stiffness: 500, damping: 20 } }}
                   whileTap={{
                     scale: 0.96,
                     x: 1,
@@ -296,6 +318,7 @@ export function Sidebar() {
                     icon={item.icon}
                     label={item.label}
                     badge={getBadge(item.id)}
+                    secondaryBadge={getSecondaryBadge(item.id)}
                     active={activePanel === item.id}
                     collapsed={false}
                     activity={item.id === "agents" ? agentActivity : undefined}
@@ -314,7 +337,7 @@ export function Sidebar() {
 
         {/* Pulse edge — attached to sidebar's right edge, moves with it */}
         <div
-          className={isLcars ? styles.pulseEdgeLcars : styles.pulseEdge}
+          className={styles.pulseEdge}
           style={edgeStyle}
         />
       </motion.aside>
